@@ -494,7 +494,7 @@ var LETTERS="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 function loadLocal(){try{var s=localStorage.getItem(LS_KEY);var d=s?JSON.parse(s):null;return d&&Array.isArray(d.players)&&Array.isArray(d.rondas)?d:null;}catch(e){return null;}}
 function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.13"; window.__APPVER=VERSION;
+var VERSION="1.3.14"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1100,8 +1100,10 @@ function manSections(){
    '<li><b>Bajar la cantidad de jugadores.</b> Si alguno de los que se quitan ya tiene nombre, la app pide confirmar.</li></ul>'],
   ["Ajustes",
    '<ul>'+
-   '<li><b>Orden de Ajustes.</b> Todas las tarjetas empiezan plegadas para no tocar nada por error; tócalas para abrirlas. Van de lo más usado a lo más delicado: Configuración · Respaldo · Ayuda · Actualizaciones · Acerca de la app · Salir · Borrar datos.</li>'+
+   '<li><b>Orden de Ajustes.</b> Todas las tarjetas empiezan plegadas para no tocar nada por error; tócalas para abrirlas. Van de lo más usado a lo más delicado: Configuración · Protección de mis datos · Respaldo · Ayuda · Actualizaciones · Acerca de la app · Salir · Borrar datos.</li>'+
    '<li><b>Configuración.</b> Nombre del torneo y docente que organiza: escríbelos y toca <b>Guardar</b>; tu nombre aparece arriba de Ronda, en Copiar posiciones y en el CSV (también se guarda solo mientras escribes). Mientras falte tu nombre, Configuración se abre sola al entrar a Ajustes. Además, jugadores, tableros, rondas y minutos por tanda. Un cambio de tableros reacomoda la ronda actual solo si aún no tiene resultados. Antes de iniciar, estos mismos valores también están en la pestaña Ronda.</li>'+
+   '<li><b>Protección de mis datos.</b> Al cerrarla, su título ya dice «protegidos» (en verde) o «sin proteger» (en rojo). Dentro dice si la app está instalada y si el navegador guarda sus datos de forma permanente. Si no están protegidos, explica por qué y cómo instalarla; «Proteger mis datos» le pide al navegador que no borre el torneo al limpiar el historial ni cuando le falta espacio. La forma segura es instalar la app y abrirla siempre desde su ícono; aun así, guarda un respaldo del torneo.</li>'+
+   '<li><b>Restablecer configuración</b> (en Borrar datos, arriba de «Nuevo torneo desde cero»). No borra el torneo: después de mostrarte la lista y pedir confirmación, vuelve el nombre del torneo a «Torneo de Ajedrez Escolar», deja vacío el docente y pone 1 tablero y 15 minutos por tanda. Si la ronda actual aún no tiene resultados, sus mesas se reacomodan como al cambiar los tableros a mano.</li>'+
    '<li><b>Respaldo.</b> “Guardar respaldo” descarga un archivo con todo el torneo; “Restaurar (recuperar) un respaldo…” lo recupera desde el archivo; si el archivo es igual al torneo que ya tienes, la app avisa que no hay nada que recuperar (sección 9).</li>'+
    '<li><b>Ayuda.</b> “Ver manual de uso” abre esta guía; “Cómo empareja la app” explica las reglas del sistema suizo que usa.</li>'+
    (IS_PWA?'<li><b>Actualizaciones.</b> Muestra la versión instalada y “Buscar actualización”. Si hay una versión nueva, toca “Actualizar”; el torneo guardado no se pierde. Si la versión nueva todavía se está publicando, la app te avisa y vuelve a revisar sola.</li>':'<li><b>Actualizaciones.</b> Muestra la versión y cómo se actualiza esta copia de la app.</li>')+
@@ -1156,6 +1158,29 @@ function openMan(sec){
   var el=sec?document.getElementById("m"+sec):null;
   if(el&&el.scrollIntoView) el.scrollIntoView({block:"start"}); else window.scrollTo(0,0);
 }
+/* 1.3.14: «Protección de mis datos»: si la app está instalada y si el navegador guarda sus datos de forma permanente. Solo informa. */
+var PR={ins:false,per:null};
+function IOS(){return /iP(hone|ad|od)/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent);}
+function prRefresh(){
+  var ins=["standalone","fullscreen","minimal-ui"].some(function(m){try{return matchMedia("(display-mode: "+m+")").matches;}catch(e){return false;}})||navigator.standalone===true;
+  var ch=ins!==PR.ins;PR.ins=ins;
+  try{if(navigator.storage&&navigator.storage.persisted)navigator.storage.persisted().then(function(v){if(v!==PR.per){PR.per=v;if(ui.tab==="aj")render();}}).catch(function(){});}catch(e){}
+  return ch;
+}
+function prOk(){return PR.ins&&PR.per!==false;}
+function prTitle(){var ok=prOk();return '<span>Protección de mis datos <span class="sumv" style="color:var('+(ok?'--felt':'--danger')+')">· '+(ok?'protegidos':'sin proteger')+'</span></span>';}
+function prInner(){
+  var ok=prOk(),c=function(x){return 'style="font-weight:700;color:var('+(x?'--felt':'--danger')+')"';},
+    row=function(a,b){return '<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)"><span>'+a+'</span>'+b+'</div>';};
+  var h='<p style="margin:0 0 8px;font-weight:700;color:var('+(ok?'--felt':'--danger')+')">'+(ok?'✅ Tus datos están protegidos':'⚠️ Tus datos no están protegidos')+'</p>'+
+    row('App instalada','<span '+c(PR.ins)+'>'+(PR.ins?'Sí':'No')+'</span>')+
+    row('Guardado permanente',PR.per==null?'<span>No disponible</span>':'<span '+c(PR.per)+'>'+(PR.per?'Sí':'No')+'</span>');
+  if(ok) return h+'<p class="note">El navegador no borrará el torneo al limpiar el historial ni por falta de espacio. Solo se borra si desinstalas la app o si borras los «datos de sitios». Aun así, guarda un respaldo del torneo.</p>';
+  h+='<p class="note">'+(PR.ins?'La app está instalada, pero el navegador todavía no guarda sus datos de forma permanente.':'Estás abriendo la app desde el navegador. Así, el navegador puede borrar el torneo al limpiar el historial o si le falta espacio.'+(IOS()?' En iPhone y iPad, Safari también lo borra si pasan 7 días sin abrirla.':''))+'</p>';
+  if(PR.per===false) h+='<button type="button" class="btn primary wf" id="b-proteger" data-act="pr-ask">Proteger mis datos</button>';
+  if(!PR.ins) h+='<p class="note">'+(IOS()?'Instala la app: en Safari, botón Compartir › <b>Agregar a inicio</b>, y ábrela siempre desde su ícono.':'Instala la app: menú del navegador (⋮) › <b>Instalar app</b> o <b>Agregar a pantalla de inicio</b>, y ábrela siempre desde su ícono.')+'</p>';
+  return h;
+}
 function card(id,title,inner){
   return '<details class="card" id="'+id+'"'+(ui.cards[id]?" open":"")+'><summary>'+title+'</summary><div class="cardin">'+inner+'</div></details>';
 }
@@ -1197,9 +1222,13 @@ function viewAj(){
   var bd='';
   if(!readOnly){
     bd='<div class="bdg">'+
-      '<p class="note">De menor a mayor alcance. Cada opción pide escribir BORRAR para confirmar.</p>'+
+      '<p class="note">De menor a mayor alcance. Cada borrado pide escribir BORRAR para confirmar.</p>'+
       '<button type="button" class="btn danger" id="b-askreset" data-act="askb" data-c="reset">Reiniciar torneo</button>'+
       '<p class="note">Borra rondas y resultados. Conserva nombres y ajustes, para repetir con el mismo grupo.</p>'+
+      '<button type="button" class="btn" id="b-rscfg" data-act="rscfg">Restablecer configuración</button>'+
+      '<p class="note">No borra el torneo: vuelve el nombre del torneo, el docente, los tableros y los minutos a como vienen de fábrica.</p>'+
+      (ui.confirm==="rscfg"?'<div class="banner buff" id="askbox"><p><b>Restablecer configuración.</b> Vuelve los ajustes a como vienen al instalar la app:</p><ul style="margin:4px 0 8px;padding-left:20px"><li>Nombre del torneo: '+esc(blank(2).name)+'</li><li>Docente: vacío</li><li>Tableros: 1</li><li>Minutos por tanda: 15</li></ul><p><b>No se borran jugadores, rondas ni resultados.</b></p>'+
+        '<div class="row"><button type="button" class="btn primary" id="b-rscfg-si" data-act="rscfg-yes">Restablecer</button><button type="button" class="btn" id="b-rscfg-no" data-act="cancel">Cancelar</button></div></div>':'')+
       '<button type="button" class="btn dangerfill" id="b-askfresh" data-act="askb" data-c="fresh">Nuevo torneo desde cero</button>'+
       '<p class="note">Borra jugadores, rondas y resultados; vuelve a 2 jugadores y 1 ronda. Conserva el nombre del torneo, el docente, los tableros y los minutos.</p>';
     if(ui.confirm==="bk-reset"||ui.confirm==="bk-fresh"){
@@ -1221,7 +1250,8 @@ function viewAj(){
     }
     bd+='</div>';
   }
-  h+='<div class="ajg">'+card("cfgc","Configuración",cfg)+'</div>';
+  prRefresh();
+  h+='<div class="ajg">'+card("cfgc","Configuración",cfg)+(IS_PWA&&!FRAMED&&!readOnly?card("prc",prTitle(),prInner()):'')+'</div>';
   h+='<div class="ajg">'+card("bkc","Respaldo",bk)+'</div>';
   h+='<div class="ajg">'+card("ayc","Ayuda",ay)+card("actc",'<span>Actualizaciones <span class="sumv">· versión '+VERSION+'</span></span>',updInner())+aboutHtml()+'</div>';
   var last=(FRAMED?'':card("salc","Salir",sal))+(readOnly?'':card("bdc","Borrar datos",bd));
@@ -1525,6 +1555,18 @@ function act(a,d){
       ui.confirm=null; ui.round=null; ui.unlock=false; ui.sorteoText="";
       mutate(function(s){var b=blank(2),keep={docente:s.docente||"",name:s.name||b.name,boards:s.boards||b.boards,minutes:s.minutes||b.minutes};Object.keys(s).forEach(function(k){delete s[k];});Object.keys(b).forEach(function(k){s[k]=b[k];});Object.keys(keep).forEach(function(k){s[k]=keep[k];});});
       ui.tab="ronda"; tReset(); render(); window.scrollTo(0,0); toast("Nuevo torneo listo: 2 jugadores y 1 ronda; se conservan el nombre, los tableros y los minutos"); break;
+    case "pr-ask":
+      try{navigator.storage.persist().then(function(r){PR.per=!!r;toast(r?"Listo: el navegador guardará el torneo de forma permanente":"El navegador no lo aceptó todavía. Instala la app, ábrela desde su ícono y vuelve a intentarlo.");render();}).catch(function(){toast("El navegador no lo aceptó todavía. Instala la app, ábrela desde su ícono y vuelve a intentarlo.");});}catch(e){}
+      break;
+    case "rscfg":
+      var b0=blank(2);
+      if(state.name===b0.name&&!state.docente&&state.boards===b0.boards&&state.minutes===b0.minutes){toast("La configuración ya está como viene de fábrica");break;}
+      ui.confirm="rscfg"; ui.cards.bdc=true; render(); var rb=document.getElementById("askbox"); if(rb&&rb.scrollIntoView) rb.scrollIntoView({block:"center"}); break;
+    case "rscfg-yes":
+      var b1=blank(2); ui.confirm=null;
+      mutate(function(s){s.name=b1.name; s.docente="";});
+      setNum("boards",b1.boards); setNum("minutes",b1.minutes); render();
+      toast("Configuración restablecida"); break;
     case "cfg-save":
       var ni=document.getElementById("in-name"),di=document.getElementById("in-doc");
       try{if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();}catch(e){}
