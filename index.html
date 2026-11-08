@@ -246,6 +246,9 @@ label.btn{display:inline-flex;align-items:center}
 .upd{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:25;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
   background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 12px 10px 16px;max-width:728px;margin:0 auto}
 .upd span{flex:1;min-width:12ch}
+.app>.upd{position:static;margin:0;max-width:none;background:var(--surface);color:var(--ink);border:2px solid var(--felt);border-radius:12px;padding:10px 12px;gap:8px;flex-wrap:nowrap}
+.app>.upd span{min-width:0;font-weight:600}
+.upd .updx{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 .upd button{min-height:40px;border-radius:9px;border:0;padding:0 14px;background:var(--felt);color:var(--on-felt);font-weight:600;cursor:pointer}
 textarea{width:100%;min-height:160px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:10px;font-size:.875rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);
@@ -509,7 +512,7 @@ var LETTERS="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 function loadLocal(){try{var s=localStorage.getItem(LS_KEY);var d=s?JSON.parse(s):null;return d&&Array.isArray(d.players)&&Array.isArray(d.rondas)?d:null;}catch(e){return null;}}
 function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.17"; window.__APPVER=VERSION;
+var VERSION="1.3.18"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1079,7 +1082,7 @@ function manSections(){
    '<li><b>Inicia el torneo.</b> Toca “Iniciar torneo” y sienta a los alumnos según su mesa. El primero de cada mesa lleva blancas.</li></ol>'+
    '<p><b>Pestañas</b></p><ul>'+
    '<li><b>Barra de abajo.</b> Ronda · Posiciones · Jugadores · Ajustes están siempre abajo, a la mano del pulgar, como en las apps de Asistencia y Tareas. Cada pestaña se abre desde arriba; si tocas la pestaña donde ya estás, la pantalla se queda como está.</li>'+
-   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo: a la izquierda, la siguiente; a la derecha, la anterior; en la última no da la vuelta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Al abrir la app con internet se actualiza sola y la primera vez avisa «App actualizada a la versión…». Si se publica una versión mientras la usas, sale el aviso «Hay una versión nueva» con el botón Actualizar.</li>'+
+   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo: a la izquierda, la siguiente; a la derecha, la anterior; en la última no da la vuelta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
    '<li><b>Fecha, hora y docente.</b> En Ronda, arriba, ves el día, la fecha, la hora y “Docente: tu nombre”. En Posiciones, Jugadores y Ajustes, un renglón con la fecha y la hora. La hora cambia sola. Si falta tu nombre, Ronda te avisa; escríbelo en Ajustes › Configuración.</li></ul>'+
    '<p><b>Botones de arriba</b></p><ul>'+
    '<li><b>⏻ Salir</b> (a la izquierda): pregunta “¿Salir de la app?”; con Confirmar aparece “Saliste de la app” y la app intenta cerrarse. Tu torneo queda guardado. Si el teléfono no deja cerrarla, te dice cómo salir; “Volver a entrar” te regresa a Ronda. También puedes salir desde Ajustes › Salir.</li>'+
@@ -1690,7 +1693,7 @@ try{var __pv=localStorage.getItem('torneo-suizo-ver');if(__pv&&__pv!==VERSION)se
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});}catch(e){}   /* 1.3.12 */
 })();
 </script>
-<div class="upd" id="upd" role="status" hidden><span>Hay una versión nueva de la app.</span><button type="button" id="b-upd">Actualizar</button></div>
+<div class="upd" id="upd" role="status" hidden><span>Hay una versión nueva de la app.</span><button type="button" id="b-upd">Actualizar</button><button type="button" class="updx" id="b-updx" aria-label="Cerrar aviso">✕</button></div>
 <script>
 (function(){
   if(!("serviceWorker" in navigator)||location.protocol.indexOf("http")!==0) return;
@@ -1699,11 +1702,13 @@ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().
   // la activa sola, sin aviso y sin recargar; el aviso solo sale si de verdad hay una versión más nueva.
   function verOf(w){return new Promise(function(res){try{var ch=new MessageChannel(),t=setTimeout(function(){res(null);},1500);
     ch.port1.onmessage=function(e){clearTimeout(t);res(e.data);};w.postMessage("version",[ch.port2]);}catch(e){res(null);}});}
+  try{var ap=document.querySelector(".app"),hd=ap&&ap.querySelector("header.top");if(ap){if(hd&&hd.nextSibling)ap.insertBefore(bar,hd.nextSibling);else ap.insertBefore(bar,ap.firstChild);}}catch(e){}
+  document.getElementById("b-updx").addEventListener("click",function(){bar.hidden=true;});
   function offer(w){
     if(!w) return Promise.resolve(false);
     return verOf(w).then(function(v){
       if(v&&window.__APPVER&&v===window.__APPVER){reloading=true;w.postMessage("activar");return false;}
-      waiting=w;bar.hidden=false;return true;
+      waiting=w;bar.querySelector("span").textContent=v?"Nueva versión "+v+" disponible":"Hay una versión nueva de la app.";btn.disabled=false;bar.hidden=false;return true;
     });
   }
   window.__ofrecerActualizacion=offer;
