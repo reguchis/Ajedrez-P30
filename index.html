@@ -273,6 +273,7 @@ h1{font-size:18px;line-height:1.2}
 .panel{padding:14px}
 summary{color:var(--ink)}
 #b-cfg-save{background:var(--felt);border-color:var(--felt);color:var(--on-felt);min-height:50px}
+#navb{position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-direction:column;gap:10px;pointer-events:none}#navb button{width:52px;height:52px;min-height:0;border-radius:50%;border:0;padding:0;font-size:26px;font-weight:700;line-height:1;background:var(--felt);color:var(--on-felt);opacity:0;transition:opacity .3s;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none}#navb.on button{opacity:.6;pointer-events:auto}#navb.on button:active,#navb.on button:focus-visible{opacity:1}#navb button[hidden]{display:none!important}@media (prefers-reduced-motion:reduce){#navb button{transition:none}}@media print{#navb{display:none!important}}
 .r2b{display:flex;gap:8px}.r2b>.btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;width:auto;padding:6px 8px}
 </style>
 <script>try{var __t=localStorage.getItem('torneo-suizo-tema');if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t);}catch(e){}</script>
@@ -512,7 +513,7 @@ var LETTERS="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 function loadLocal(){try{var s=localStorage.getItem(LS_KEY);var d=s?JSON.parse(s):null;return d&&Array.isArray(d.players)&&Array.isArray(d.rondas)?d:null;}catch(e){return null;}}
 function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.18"; window.__APPVER=VERSION;
+var VERSION="1.3.19"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1082,7 +1083,7 @@ function manSections(){
    '<li><b>Inicia el torneo.</b> Toca “Iniciar torneo” y sienta a los alumnos según su mesa. El primero de cada mesa lleva blancas.</li></ol>'+
    '<p><b>Pestañas</b></p><ul>'+
    '<li><b>Barra de abajo.</b> Ronda · Posiciones · Jugadores · Ajustes están siempre abajo, a la mano del pulgar, como en las apps de Asistencia y Tareas. Cada pestaña se abre desde arriba; si tocas la pestaña donde ya estás, la pantalla se queda como está.</li>'+
-   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo: a la izquierda, la siguiente; a la derecha, la anterior; en la última no da la vuelta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
+   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo: a la izquierda, la siguiente; a la derecha, la anterior; en la última no da la vuelta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Subir y bajar.</b> En las pantallas largas (por ejemplo, Posiciones o Jugadores con muchos alumnos), al desplazarte aparecen abajo a la derecha, uno arriba del otro, dos botones redondos y transparentes: <b>↑</b> te lleva arriba y <b>↓</b> baja casi una pantalla. Se desvanecen solos a los 2 segundos sin moverte; para verlos otra vez, mueve un poco la pantalla.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
    '<li><b>Fecha, hora y docente.</b> En Ronda, arriba, ves el día, la fecha, la hora y “Docente: tu nombre”. En Posiciones, Jugadores y Ajustes, un renglón con la fecha y la hora. La hora cambia sola. Si falta tu nombre, Ronda te avisa; escríbelo en Ajustes › Configuración.</li></ul>'+
    '<p><b>Botones de arriba</b></p><ul>'+
    '<li><b>⏻ Salir</b> (a la izquierda): pregunta “¿Salir de la app?”; con Confirmar aparece “Saliste de la app” y la app intenta cerrarse. Tu torneo queda guardado. Si el teléfono no deja cerrarla, te dice cómo salir; “Volver a entrar” te regresa a Ronda. También puedes salir desde Ajustes › Salir.</li>'+
@@ -1514,6 +1515,21 @@ const i=SWTABS.indexOf(ui.tab);if(i<0)return;const j=i+(dx<0?1:-1);if(j<0||j>=SW
 function swAnim(d){const a=document.getElementById(SWEL);if(!a)return;const r=document.documentElement;r.classList.add('swa');a.classList.remove('swl','swr');void a.offsetWidth;a.classList.add(d>0?'swl':'swr');clearTimeout(swAnim.t);swAnim.t=setTimeout(()=>{a.classList.remove('swl','swr');r.classList.remove('swa')},260)}
 function swT(){var n=!SWP();try{n?localStorage.setItem('torneo-suizo-swp','1'):localStorage.removeItem('torneo-suizo-swp');}catch(e){}var b=document.getElementById('b-swp');if(b)b.textContent='Deslizar entre pestañas: '+(n?'encendido':'apagado');toast(n?'Deslizar encendido: desliza el dedo a la izquierda o a la derecha para cambiar de pestaña':'Deslizar apagado: cambia de pestaña con los botones de abajo');}
 var SWEL='view';
+/* SUBIR / BAJAR: en pantallas largas, al desplazarte aparecen abajo a la derecha ↑ y ↓; se desvanecen solos a los 2 s sin moverte.
+   ↑ te lleva arriba. ↓ baja por partes: en los reportes de todos los grupos, al inicio del siguiente grupo; si no, casi una pantalla. Sin ellos con el manual abierto («↑ Índice»). */
+(function(){var SECT='';function mk(){if(document.getElementById('navb'))return;var w=document.createElement('div');w.id='navb';
+var up=document.createElement('button'),dn=document.createElement('button');up.type=dn.type='button';up.id='subir';dn.id='bajar';up.title='Subir';dn.title='Bajar';up.setAttribute('aria-label','Subir');dn.setAttribute('aria-label','Bajar');up.textContent='↑';dn.textContent='↓';w.appendChild(up);w.appendChild(dn);document.body.appendChild(w);
+var T=0,r=0,sm=function(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}catch(e){return 'auto'}};
+var largo=function(){return document.documentElement.scrollHeight>innerHeight*1.5&&!document.getElementById('mupb')};
+var fin=function(){return scrollY+innerHeight>=document.documentElement.scrollHeight-60};
+var hide=function(){w.classList.remove('on')};
+var show=function(){if(!largo()){hide();return}up.hidden=scrollY<innerHeight*.5;dn.hidden=fin();if(up.hidden&&dn.hidden){hide();return}w.classList.add('on');clearTimeout(T);T=setTimeout(hide,2000)};
+up.onclick=function(){try{scrollTo({top:0,behavior:sm()})}catch(e){scrollTo(0,0)}show()};
+dn.onclick=function(){var y=null;if(SECT){var L=document.querySelectorAll(SECT);for(var i=0;i<L.length;i++){var t=L[i].getBoundingClientRect().top;if(t>12){y=scrollY+t-8;break}}}
+if(y==null)y=scrollY+Math.round(innerHeight*.85);try{scrollTo({top:y,behavior:sm()})}catch(e){scrollTo(0,y)}show()};
+addEventListener('scroll',function(){if(!r){r=1;requestAnimationFrame(function(){r=0;show()})}},{passive:true});addEventListener('resize',function(){if(w.classList.contains('on'))show()})}
+if(document.body)mk();else addEventListener('DOMContentLoaded',mk)})();
+
 function temaT(){var r=document.documentElement,c=r.getAttribute('data-theme')||'auto',n={auto:'light',light:'dark',dark:'auto'}[c]||'auto';if(n==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',n);try{n==='auto'?localStorage.removeItem('torneo-suizo-tema'):localStorage.setItem('torneo-suizo-tema',n);}catch(e){}toast({auto:'Tema automático (como el aparato)',light:'Tema claro',dark:'Tema oscuro'}[n]);}
 function temaSet(){try{return !!localStorage.getItem('torneo-suizo-tema');}catch(e){return false;}}
 function act(a,d){
