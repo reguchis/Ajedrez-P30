@@ -525,7 +525,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.21"; window.__APPVER=VERSION;
+var VERSION="1.3.22"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -691,7 +691,7 @@ function svClr(){try{for(const k of['xls','rep','bk','md','qr'])localStorage.rem
 /* el archivo en la forma que el aparato acepte compartir (si no acepta ninguna, null: se descarga) */
 function svFile(n,d){if(!navigator.share||!navigator.canShare)return null;const e=(n.match(/\.([a-z0-9]+)$/i)||['',''])[1].toLowerCase(),
 T={csv:'text/csv',json:'application/json',pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',txt:'text/plain'}[e]||'application/octet-stream',
-L=[[n,T]];if(e=='json'||e=='csv')L.push([n.replace(/\.[a-z0-9]+$/i,'.txt'),'text/plain']);if(e=='csv')L.splice(1,0,[n,'text/plain']);
+L=e=='json'?[[n.replace(/\.json$/i,'.txt'),'text/plain'],[n,T]]:[[n,T]];if(e=='csv'){L.push([n,'text/plain']);L.push([n.replace(/\.csv$/i,'.txt'),'text/plain'])}
 for(const[m,t]of L){try{const f=new File([d],m,{type:t});if(navigator.canShare({files:[f]}))return f}catch(x){}}return null}
 /* la ventana: resuelve 'dl' (guardar), 'sh' (compartir) o null (cancelar). Recuerda la elección por tipo de archivo. */
 function svAsk(k,n){return new Promise(res=>{const o=document.getElementById('svdlg');if(o)o.remove();const d=document.createElement('div');d.id='svdlg';
@@ -709,7 +709,7 @@ document.body.appendChild(d)})}
 async function sOut(n,data,k,o){o=o||{};if(!svMov())return SVSAVE(n,data,o);const f=svFile(n,data);if(!f)return SVSAVE(n,data,o);
 const c=await svAsk(k,n);if(!c){toast(o.cancel||'No se guardó ni se compartió el archivo.');return false}
 if(c=='dl'){const r=await SVSAVE(n,data,o);if(r!==false&&k=='bk')setTimeout(()=>toast('Respaldo guardado en el celular. Guarda también una copia fuera de él (correo, Drive o WhatsApp a ti mismo).'),2200);return r!==false}
-try{await navigator.share({files:[f],title:o.title||n});toast(o.ok||'Archivo compartido: '+n);return true}
+try{await navigator.share({files:[f],title:o.title||n});toast((o.ok||'Archivo compartido: '+f.name)+(f.name!==n?' Va como '+f.name+' (mismo contenido): se abre y se recupera igual.':''));return true}
 catch(x){if(x&&x.name=='AbortError'){toast(o.cancel||'No se compartió el archivo.');return false}const r=await SVSAVE(n,data,o);return r!==false}}
 
 function saveFile0(name,text,mime){
@@ -1139,7 +1139,7 @@ function manSections(){
    '<li><b>Tandas.</b> Si hay menos tableros que partidas, la ronda se divide en tandas. La tanda B entra conforme se desocupen tableros; quienes esperan en una ronda juegan primero en la siguiente.</li>'+
    '<li><b>Captura resultados.</b> En cada mesa toca <span class="nw">1–0</span> (ganan blancas), <span class="nw">½–½</span> (tablas) o <span class="nw">0–1</span> (ganan negras). Para corregir, toca otra opción; si tocas la misma, se borra.</li>'+
    '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista.</li>'+
-   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el celular»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero y resaltada; la otra siempre está. En el respaldo, aunque lo guardes en el celular, guarda también una copia fuera de él. En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
+   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el celular»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero y resaltada; la otra siempre está. En el respaldo, aunque lo guardes en el celular, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
    '<li><b>PDF de la ronda.</b> Hoja carta con las mesas de cada tanda: quién juega con blancas, quién con negras y un recuadro para anotar el resultado; abajo, quién descansa. Sirve para imprimirla y pegarla antes de empezar.</li>'+
    '<li><b>Deshacer esta ronda.</b> Está en su propio renglón, abajo, para no tocarlo por error. Borra los emparejamientos y resultados de la ronda actual; las anteriores se conservan.</li>'+
    '<li><b>Rondas anteriores.</b> Ábrelas con los botones R1, R2… Para cambiar un resultado toca “Corregir resultados”; los emparejamientos que ya se hicieron no cambian, solo los puntos.</li></ul>'],
@@ -1193,12 +1193,12 @@ function manSections(){
    '<ul>'+
    '<li><b>Dónde se guarda.</b> Todo el torneo se guarda solo en este navegador y en este equipo, al momento, sin que tengas que guardar a mano.</li>'+
    '<li><b>Qué se pierde.</b> Si borras los datos del navegador (cookies y datos de sitios), desinstalas la app o usas una ventana de incógnito, se pierde el torneo completo: nombres, rondas y resultados.</li>'+
-   '<li><b>Qué sirve para recuperarlo.</b> Solo el archivo de respaldo (<span class="nw">torneo-respaldo_….json</span>). Guarda uno al terminar el torneo y, si quieres, después de cada ronda.</li>'+
+   '<li><b>Qué sirve para recuperarlo.</b> Solo el archivo de respaldo (<span class="nw">torneo-respaldo_….json o .txt</span>). Guarda uno al terminar el torneo y, si quieres, después de cada ronda.</li>'+
    '<li><b>Cada versión guarda su propio torneo.</b> La app instalada, el archivo HTML y el enlace de Claude no comparten datos; tampoco dos navegadores o dos equipos. Para pasar un torneo de uno a otro, usa el respaldo.</li></ul>'+
    '<p><b>La app aparece vacía</b></p><ol>'+
    '<li>Revisa que abriste la misma versión, en el mismo navegador y equipo donde capturaste.</li>'+
    '<li>Si se borraron los datos, ve a Ajustes › Respaldo y toca “Restaurar (recuperar) un respaldo…”.</li>'+
-   '<li>Elige el archivo <span class="nw">torneo-respaldo_….json</span> más reciente y toca “Sí, restaurar”.</li></ol>'+
+   '<li>Elige el archivo <span class="nw">torneo-respaldo_….json o .txt</span> más reciente y toca “Sí, restaurar”.</li></ol>'+
    '<p>Mientras hay una ronda en curso, la app pide mantener la pantalla encendida, si el navegador lo permite. Instalada desde su enlace, abre sin internet desde el ícono.</p>']
   ];
 }
@@ -1268,7 +1268,7 @@ function viewAj(){
   if(state.rondas.length>0) cfg+='<p class="note">Con el torneo empezado, los jugadores se agregan o retiran en la pestaña Jugadores. Un cambio de tableros reacomoda la ronda actual solo si aún no tiene resultados.</p>';
   var bk='<p class="note">Guarda el torneo completo en un archivo (JSON) para no perderlo o para pasarlo a otro equipo.</p>'+
     '<button type="button" class="btn wf" id="b-backup" data-act="backup">Guardar respaldo</button>'+
-    (readOnly?'':'<p class="note" style="margin-top:12px">¿Perdiste el torneo o cambiaste de equipo? Recupéralo desde un archivo torneo-respaldo_….json:</p><label class="btn wf" for="in-restore" style="justify-content:center">Restaurar (recuperar) un respaldo…</label><input type="file" id="in-restore" accept=".json,application/json" hidden>');
+    (readOnly?'':'<p class="note" style="margin-top:12px">¿Perdiste el torneo o cambiaste de equipo? Recupéralo desde un archivo torneo-respaldo_….json o .txt:</p><label class="btn wf" for="in-restore" style="justify-content:center">Restaurar (recuperar) un respaldo…</label><input type="file" id="in-restore" accept=".json,.txt,application/json,text/plain" hidden>');
   if(ui.confirm==="restore"&&ui.restore){
     var R=ui.restore;
     bk+='<div class="banner buff"><p>El respaldo “'+esc(R.name||"Torneo")+'” tiene '+R.players.length+' jugadores y '+R.rondas.length+(R.rondas.length===1?' ronda':' rondas')+'. Restaurarlo reemplaza el torneo actual.</p>'+
