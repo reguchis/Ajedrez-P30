@@ -97,6 +97,8 @@ p{margin:0}
 .note{color:var(--muted);font-size:.875rem;max-width:62ch}
 .stack{display:flex;flex-direction:column;gap:10px;min-width:0}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* 1.3.26: botones en columnas del mismo ancho */
+.row.eq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 .between{justify-content:space-between}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
@@ -525,7 +527,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.25"; window.__APPVER=VERSION;
+var VERSION="1.3.26"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1083,7 +1085,7 @@ function viewPos(){
   h+='</tbody></table></div>';
   h+='<p class="note">Desempates, en orden: partida entre ellos (cuando empatan dos); Bch (Buchholz, suma de puntos de los rivales; un descanso cuenta como un rival con tus mismos puntos); Bch-1 (Buchholz sin el rival más débil); Gan (partidas ganadas). D es descanso.'+
      (anyTie?' El signo = marca un empate sin resolver: los empatados comparten el lugar. Si es por el primer lugar, se decide con una final rápida a 5 min.':'')+'</p>';
-  h+='<div class="row"><button type="button" class="btn" id="b-copys" data-act="copy-s">Copiar posiciones</button>'+
+  h+='<div class="row eq"><button type="button" class="btn" id="b-copys" data-act="copy-s">Copiar posiciones</button>'+
      '<button type="button" class="btn" id="b-csv" data-act="csv">Exportar a Excel (CSV)</button>'+
      (n?'<button type="button" class="btn" id="b-pdf" data-act="pdf">PDF de posiciones</button>':'')+
      (n?'<button type="button" class="btn" id="b-projpos" data-act="proj-open" data-v="pos">Modo proyector</button>':'')+'</div>'+copyBox();
