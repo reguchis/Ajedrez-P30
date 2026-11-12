@@ -97,7 +97,7 @@ p{margin:0}
 .note{color:var(--muted);font-size:.875rem;max-width:62ch}
 .stack{display:flex;flex-direction:column;gap:10px;min-width:0}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-/* 1.3.27: botones en columnas del mismo ancho */
+/* 1.3.28: botones en columnas del mismo ancho */
 .row.eq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 .between{justify-content:space-between}
 
@@ -527,7 +527,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.27"; window.__APPVER=VERSION;
+var VERSION="1.3.28"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -680,10 +680,19 @@ function syncWake(){
 document.addEventListener("visibilitychange",syncWake);
 
 /* ---------- Archivos: respaldo y CSV ---------- */
+/* 2026-11: nombres de archivo App_Qué_Periodo_Grupo_Materia_Parcial_Fecha_Hora, sin acentos ni espacios (Periodo: agosto–enero = A, febrero–julio = B) */
+const fnW=x=>String(x==null?'':x).normalize('NFD').replace(/[̀-ͯ]/g,'').split(/[^A-Za-z0-9]+/).filter(Boolean),
+fnSl=x=>fnW(x).map(w=>w[0].toUpperCase()+w.slice(1)).join(''),
+fnPer=d=>{d=d instanceof Date?d:d?new Date(String(d).slice(0,10)+'T12:00'):new Date();if(isNaN(d))d=new Date();const m=d.getMonth()+1,y=d.getFullYear();return m>=8?y+'A':m==1?(y-1)+'A':y+'B'},
+fnHoy=()=>{try{if(typeof LSD=='function')return LSD().replace(/\s/g,'')}catch(e){}return fnPer()},
+fnMat=s=>{const w=fnW(String(s||'').split('.')[0]),R={I:1,II:2,III:3,IV:4,V:5,VI:6};let n='';if(w.length>1&&R[w[w.length-1]])n=R[w.pop()];else if(w.length>1&&/^\d+$/.test(w[w.length-1]))n=w.pop();let a=w.filter(x=>/^[A-Z]/.test(x)).map(x=>x[0]).join('');if(a.length<2)a=fnSl(w[0]||'').slice(0,10);return a+n},
+fnPar=p=>{const t=String(p||'');if(/semestre/i.test(t))return'Semestre';if(/final/i.test(t))return'Final';const m=t.match(/(\d+)/);return m?'P'+m[1]:fnSl(t)},
+fnSt=()=>{const n=new Date(),z=x=>(x<10?'0':'')+x;return n.getFullYear()+'-'+z(n.getMonth()+1)+'-'+z(n.getDate())+'_'+z(n.getHours())+z(n.getMinutes())},
+FNM=(a,q,per,parts)=>[a,q,per===null?'':per||fnHoy(),...(parts||[]).map(x=>String(x==null?'':x))].filter(Boolean).join('_')+'_'+fnSt();
 function stamp(){var d=new Date(),z=function(n){return (n<10?"0":"")+n;};return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+"_"+z(d.getHours())+z(d.getMinutes());}
 function showText(txt,msg){ui.copy=txt;ui.copyMsg=msg;render();var ta=document.getElementById("copybox");if(ta){ta.focus();ta.select();}}
 /* 1.3.21: saveFile pregunta en el celular «Guardar en el dispositivo» (1.3.23: antes «… en el celular») o «Compartir…» (sOut); saveFile0 es la descarga de antes */
-function saveFile(name,text,mime){return sOut(name,text,/^torneo-respaldo_/.test(name)?'bk':'rep',{mime:mime,title:/^torneo-respaldo_/.test(name)?'Respaldo · Torneo Suizo':name,ok:/^torneo-respaldo_/.test(name)?'Respaldo compartido. Guárdalo fuera del dispositivo (correo, Drive o WhatsApp a ti mismo).':undefined,cancel:/^torneo-respaldo_/.test(name)?'Respaldo cancelado: no se guardó ninguna copia.':undefined});}
+function saveFile(name,text,mime){return sOut(name,text,/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'bk':'rep',{mime:mime,title:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo · Torneo Suizo':name,ok:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo compartido. Guárdalo fuera del dispositivo (correo, Drive o WhatsApp a ti mismo).':undefined,cancel:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo cancelado: no se guardó ninguna copia.':undefined});}
 /* SALIDA (Guardar en el dispositivo / Compartir…): ver build/salida_js.py */
 const SVP='torneo-suizo-sv-',SVD={bk:'sh'},SVSAVE=(n,d,o)=>{if(d instanceof Blob){try{const u=URL.createObjectURL(d),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);toast('Archivo listo: '+n)}catch(e){window.open(URL.createObjectURL(d),'_blank')}return true}saveFile0(n,d,o.mime||'application/octet-stream');return true};
 /* celular o tablet: también la tablet Android que Chrome abre «en modo escritorio» (pantalla táctil como puntero principal) */
@@ -1144,7 +1153,7 @@ function manSections(){
    '<li><b>Tandas.</b> Si hay menos tableros que partidas, la ronda se divide en tandas. La tanda B entra conforme se desocupen tableros; quienes esperan en una ronda juegan primero en la siguiente.</li>'+
    '<li><b>Captura resultados.</b> En cada mesa toca <span class="nw">1–0</span> (ganan blancas), <span class="nw">½–½</span> (tablas) o <span class="nw">0–1</span> (ganan negras). Para corregir, toca otra opción; si tocas la misma, se borra.</li>'+
    '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista.</li>'+
-   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero (en el respaldo, siempre «Compartir…» primero) y resaltada; la otra siempre está. También pregunta en la tablet aunque Chrome la abra en modo escritorio. «Compartir…» abre el menú de Android o iPhone en ese mismo toque. Si el navegador no lo abre, la app te dice la razón y te deja tocar «Compartir…» otra vez o guardarlo en el dispositivo: nunca se guarda sin preguntarte. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
+   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero (en el respaldo, siempre «Compartir…» primero) y resaltada; la otra siempre está. También pregunta en la tablet aunque Chrome la abra en modo escritorio. «Compartir…» abre el menú de Android o iPhone en ese mismo toque. Si el navegador no lo abre, la app te dice la razón y te deja tocar «Compartir…» otra vez o guardarlo en el dispositivo: nunca se guarda sin preguntarte. <b>Nombres de los archivos</b>: Ajedrez_Qué_Fecha_Hora, por ejemplo Ajedrez_Respaldo_2026-11-12_0950.json o Ajedrez_Posiciones_Ronda3_2026-11-12_0950.pdf, igual que en tus otras apps. Los respaldos con el nombre anterior (torneo-respaldo_…) se siguen abriendo igual. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
    '<li><b>PDF de la ronda.</b> Hoja carta con las mesas de cada tanda: quién juega con blancas, quién con negras y un recuadro para anotar el resultado; abajo, quién descansa. Sirve para imprimirla y pegarla antes de empezar.</li>'+
    '<li><b>Deshacer esta ronda.</b> Está en su propio renglón, abajo, para no tocarlo por error. Borra los emparejamientos y resultados de la ronda actual; las anteriores se conservan.</li>'+
    '<li><b>Rondas anteriores.</b> Ábrelas con los botones R1, R2… Para cambiar un resultado toca “Corregir resultados”; los emparejamientos que ya se hicieron no cambian, solo los puntos.</li></ul>'],
@@ -1198,12 +1207,12 @@ function manSections(){
    '<ul>'+
    '<li><b>Dónde se guarda.</b> Todo el torneo se guarda solo en este navegador y en este equipo, al momento, sin que tengas que guardar a mano.</li>'+
    '<li><b>Qué se pierde.</b> Si borras los datos del navegador (cookies y datos de sitios), desinstalas la app o usas una ventana de incógnito, se pierde el torneo completo: nombres, rondas y resultados.</li>'+
-   '<li><b>Qué sirve para recuperarlo.</b> Solo el archivo de respaldo (<span class="nw">torneo-respaldo_….json o .txt</span>). Guarda uno al terminar el torneo y, si quieres, después de cada ronda.</li>'+
+   '<li><b>Qué sirve para recuperarlo.</b> Solo el archivo de respaldo (<span class="nw">Ajedrez_Respaldo_….json o .txt</span>). Guarda uno al terminar el torneo y, si quieres, después de cada ronda.</li>'+
    '<li><b>Cada versión guarda su propio torneo.</b> La app instalada, el archivo HTML y el enlace de Claude no comparten datos; tampoco dos navegadores o dos equipos. Para pasar un torneo de uno a otro, usa el respaldo.</li></ul>'+
    '<p><b>La app aparece vacía</b></p><ol>'+
    '<li>Revisa que abriste la misma versión, en el mismo navegador y equipo donde capturaste.</li>'+
    '<li>Si se borraron los datos, ve a Ajustes › Respaldo y toca “Restaurar (recuperar) un respaldo…”.</li>'+
-   '<li>Elige el archivo <span class="nw">torneo-respaldo_….json o .txt</span> más reciente y toca “Sí, restaurar”.</li></ol>'+
+   '<li>Elige el archivo <span class="nw">Ajedrez_Respaldo_….json o .txt</span> más reciente y toca “Sí, restaurar”.</li></ol>'+
    '<p>Mientras hay una ronda en curso, la app pide mantener la pantalla encendida, si el navegador lo permite. Instalada desde su enlace, abre sin internet desde el ícono.</p>']
   ];
 }
@@ -1273,7 +1282,7 @@ function viewAj(){
   if(state.rondas.length>0) cfg+='<p class="note">Con el torneo empezado, los jugadores se agregan o retiran en la pestaña Jugadores. Un cambio de tableros reacomoda la ronda actual solo si aún no tiene resultados.</p>';
   var bk='<p class="note">Guarda el torneo completo en un archivo (JSON) para no perderlo o para pasarlo a otro equipo.</p>'+
     '<button type="button" class="btn wf" id="b-backup" data-act="backup">Guardar respaldo</button>'+
-    (readOnly?'':'<p class="note" style="margin-top:12px">¿Perdiste el torneo o cambiaste de equipo? Recupéralo desde un archivo torneo-respaldo_….json o .txt:</p><label class="btn wf" for="in-restore" style="justify-content:center">Restaurar (recuperar) un respaldo…</label><input type="file" id="in-restore" accept=".json,.txt,application/json,text/plain" hidden>');
+    (readOnly?'':'<p class="note" style="margin-top:12px">¿Perdiste el torneo o cambiaste de equipo? Recupéralo desde un archivo Ajedrez_Respaldo_….json o .txt:</p><label class="btn wf" for="in-restore" style="justify-content:center">Restaurar (recuperar) un respaldo…</label><input type="file" id="in-restore" accept=".json,.txt,application/json,text/plain" hidden>');
   if(ui.confirm==="restore"&&ui.restore){
     var R=ui.restore;
     bk+='<div class="banner buff"><p>El respaldo “'+esc(R.name||"Torneo")+'” tiene '+R.players.length+' jugadores y '+R.rondas.length+(R.rondas.length===1?' ronda':' rondas')+'. Restaurarlo reemplaza el torneo actual.</p>'+
@@ -1535,7 +1544,7 @@ function rndPdf(ri){
   if(by.length){need(60);y+=14;c.fillStyle="#14221a";c.font="bold 18px "+PF;c.fillText(pFit(c,"Descansa (1 punto): "+by.map(function(g){return who(g.w);}).join(", "),PW-2*PM),PM,y+16);y+=36}
   pages.forEach(function(cv,i){var x=cv.getContext("2d");x.fillStyle="#8a968e";x.font="12px "+PF;x.textAlign="right";x.textBaseline="middle";x.fillText("Torneo Suizo Escolar · página "+(i+1)+" de "+pages.length,PW-PM,PH-28);x.textAlign="left";});
   var b;try{b=pdfBlob(pages);}catch(e){return toast("No se pudo crear el PDF en este navegador.");}
-  var name="torneo-ronda"+(ri+1)+"_"+stamp()+".pdf",url=URL.createObjectURL(b);
+  var name=FNM('Ajedrez','Ronda'+(ri+1),null)+".pdf",url=URL.createObjectURL(b);
   if(svMov()&&svFile(name,b)){URL.revokeObjectURL(url);sOut(name,b,'rep');return;}
   var plain=function(){try{var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},1500);toast("PDF listo: "+name+" (hoja carta).");}catch(e){window.open(url,"_blank");}};
   if(window.claude&&window.claude.use){window.claude.use("downloads").then(function(dl){if(!dl)return plain();dl.save({filename:name,data:b}).then(function(){toast("PDF listo: "+name+" (hoja carta).");},function(e){var c2=e&&e.code;if(c2==="declined")return;if(c2==="rate_limited")return toast("Ya hay una descarga pendiente. Intenta de nuevo en un momento.");plain();});},plain);return;}
@@ -1544,7 +1553,7 @@ function rndPdf(ri){
 function posPdf(){
   var P=posPdfData();if(!P) return toast("Todavía no hay una ronda completa: captura los resultados de la ronda 1.");
   var b;try{b=pdfBlob(posPdfPages(P));}catch(e){return toast("No se pudo crear el PDF en este navegador.");}
-  var name="torneo-posiciones_"+(P.fin?"finales":"ronda"+P.k)+"_"+stamp()+".pdf",url=URL.createObjectURL(b);
+  var name=FNM('Ajedrez','Posiciones',null,[P.fin?'Finales':'Ronda'+P.k])+".pdf",url=URL.createObjectURL(b);
   if(svMov()&&svFile(name,b)){URL.revokeObjectURL(url);sOut(name,b,'rep');return;}
   var plain=function(){try{var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},1500);toast("PDF listo: "+name+" (hoja carta).");}catch(e){window.open(url,"_blank");}};
   if(window.claude&&window.claude.use){window.claude.use("downloads").then(function(dl){if(!dl)return plain();dl.save({filename:name,data:b}).then(function(){toast("PDF listo: "+name+" (hoja carta).");},function(e){var c=e&&e.code;if(c==="declined")return;if(c==="rate_limited")return toast("Ya hay una descarga pendiente. Intenta de nuevo en un momento.");plain();});},plain);return;}
@@ -1684,12 +1693,12 @@ function act(a,d){
     case "unlock": ui.unlock=true; render(); break;
     case "ask": ui.confirm=d.c; render(); break;
     case "askb": if(d.c==="reset"&&!state.rondas.length){toast("Todavía no hay rondas que borrar.");break;} ui.confirm="bk-"+d.c; ui.askOk=false; ui.cards.bdc=true; render(); var ab=document.getElementById("askbox"); if(ab&&ab.scrollIntoView) ab.scrollIntoView({block:"center"}); break;
-    case "bkb": saveFile("torneo-respaldo_"+stamp()+".json",backupText(),"application/json").then(function(k){if(k===false){toast("No se guardó el respaldo, así que no se borró nada.");return;}bkMark();act("bkn",d);}); break;
+    case "bkb": saveFile(FNM('Ajedrez','Respaldo',null)+".json",backupText(),"application/json").then(function(k){if(k===false){toast("No se guardó el respaldo, así que no se borró nada.");return;}bkMark();act("bkn",d);}); break;
     case "bkn": ui.confirm=d.c; ui.askOk=false; ui.cards.bdc=true; render(); var aw=document.getElementById("askw"); if(aw){try{aw.focus();}catch(x){} if(aw.scrollIntoView) aw.scrollIntoView({block:"center"});} break;
     case "cancel": ui.askOk=false; ui.confirm=null; ui.restore=null; ui.shrink=null; render(); break;
     case "shrink-yes": var to=ui.shrink; ui.confirm=null; ui.shrink=null; if(to!=null) setNum("players",to,true); else render(); break;
-    case "backup": saveFile("torneo-respaldo_"+stamp()+".json",backupText(),"application/json").then(function(k){if(k===false)return;bkMark(); if(ui.tab==="ronda") render();}); break;
-    case "csv": saveFile("torneo-posiciones_"+stamp()+".csv",csvText(),"text/csv"); break;
+    case "backup": saveFile(FNM('Ajedrez','Respaldo',null)+".json",backupText(),"application/json").then(function(k){if(k===false)return;bkMark(); if(ui.tab==="ronda") render();}); break;
+    case "csv": saveFile(FNM('Ajedrez','Posiciones',null)+".csv",csvText(),"text/csv"); break;
     case "pdf": posPdf(); break;
     case "restore":
       if(!ui.restore) return;
