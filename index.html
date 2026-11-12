@@ -525,7 +525,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.23"; window.__APPVER=VERSION;
+var VERSION="1.3.24"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -684,7 +684,8 @@ function showText(txt,msg){ui.copy=txt;ui.copyMsg=msg;render();var ta=document.g
 function saveFile(name,text,mime){return sOut(name,text,/^torneo-respaldo_/.test(name)?'bk':'rep',{mime:mime,title:/^torneo-respaldo_/.test(name)?'Respaldo · Torneo Suizo':name,ok:/^torneo-respaldo_/.test(name)?'Respaldo compartido. Guárdalo fuera del dispositivo (correo, Drive o WhatsApp a ti mismo).':undefined,cancel:/^torneo-respaldo_/.test(name)?'Respaldo cancelado: no se guardó ninguna copia.':undefined});}
 /* SALIDA (Guardar en el dispositivo / Compartir…): ver build/salida_js.py */
 const SVP='torneo-suizo-sv-',SVD={bk:'sh'},SVSAVE=(n,d,o)=>{if(d instanceof Blob){try{const u=URL.createObjectURL(d),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);toast('Archivo listo: '+n)}catch(e){window.open(URL.createObjectURL(d),'_blank')}return true}saveFile0(n,d,o.mime||'application/octet-stream');return true};
-function svMov(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent)}
+/* celular o tablet: también la tablet Android que Chrome abre «en modo escritorio» (pantalla táctil como puntero principal) */
+function svMov(){const u=navigator.userAgent;let c=false;try{c=matchMedia('(pointer:coarse)').matches}catch(e){}return /Android|iPhone|iPad|iPod/i.test(u)||!!(navigator.userAgentData&&navigator.userAgentData.mobile)||navigator.maxTouchPoints>1&&(/Macintosh/.test(u)||c)}
 function svGet(k){try{const v=localStorage.getItem(SVP+k);if(v=='dl'||v=='sh')return v}catch(e){}return SVD[k]||'dl'}
 function svSet(k,v){try{localStorage.setItem(SVP+k,v)}catch(e){}}
 function svClr(){try{for(const k of['xls','rep','bk','md','qr'])localStorage.removeItem(SVP+k)}catch(e){}}
@@ -696,11 +697,11 @@ for(const[m,t]of L){try{const f=new File([d],m,{type:t});if(navigator.canShare({
 /* la ventana: resuelve 'dl' (guardar), 'sh' (compartir) o null (cancelar). Recuerda la elección por tipo de archivo. */
 function svAsk(k,n){return new Promise(res=>{const o=document.getElementById('svdlg');if(o)o.remove();const d=document.createElement('div');d.id='svdlg';
 d.style.cssText='position:fixed;inset:0;z-index:60;background:#0008;display:flex;padding:16px;overflow:auto';
-const last=svGet(k),A={dl:['Guardar en el dispositivo','Se guarda en Descargas'],sh:['Compartir…','WhatsApp, correo, Drive…']},ord=last=='sh'?['sh','dl']:['dl','sh'],
+const last=svGet(k),A={dl:['Guardar en el dispositivo','Se guarda en Descargas'],sh:['Compartir…','WhatsApp, correo, Drive…']},ord=last=='sh'||k=='bk'||k=='md'?['sh','dl']:['dl','sh'],
 bt=(c,i)=>'<button type=button class="'+(i?'btn':'btn primary')+'" data-sv="'+c+'" style="display:block;width:100%;margin:8px 0 0;text-align:center;line-height:1.25">'+A[c][0]+'<br><small style="font-weight:400;opacity:.85;color:inherit;font-size:12px">'+A[c][1]+'</small></button>',
 es=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 d.innerHTML='<div class="panel" style="max-width:360px;width:100%;margin:auto"><b style="font-size:17px">¿Qué hago con el archivo?</b><p style="margin:4px 0 6px;font-size:13px;opacity:.75;word-break:break-all">'+es(n)+'</p>'+
-(k=='bk'?'<p style="margin:0 0 4px;font-size:13px">Tu respaldo debe quedar también <b>fuera</b> del celular (correo, Drive o WhatsApp a ti mismo).</p>':'')+
+(k=='bk'?'<p style="margin:0 0 4px;font-size:13px">Tu respaldo debe quedar también <b>fuera</b> del dispositivo (correo, Drive o WhatsApp a ti mismo).</p>':'')+
 ord.map(bt).join('')+'<button type=button class="btn" data-sv="" style="display:block;width:100%;margin:8px 0 0">Cancelar</button></div>';
 const fin=v=>{d.remove();removeEventListener('keydown',kd,true);if(v)svSet(k,v);res(v||null)},kd=e=>{if(e.key=='Escape'){e.preventDefault();fin(null)}};
 d.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sv]');if(b)return fin(b.dataset.sv);if(e.target===d)fin(null)});addEventListener('keydown',kd,true);
@@ -710,7 +711,7 @@ async function sOut(n,data,k,o){o=o||{};if(!svMov())return SVSAVE(n,data,o);cons
 const c=await svAsk(k,n);if(!c){toast(o.cancel||'No se guardó ni se compartió el archivo.');return false}
 if(c=='dl'){const r=await SVSAVE(n,data,o);if(r!==false&&k=='bk')setTimeout(()=>toast('Respaldo guardado en el dispositivo. Guarda también una copia fuera de él (correo, Drive o WhatsApp a ti mismo).'),2200);return r!==false}
 try{await navigator.share({files:[f],title:o.title||n});toast((o.ok||'Archivo compartido: '+f.name)+(f.name!==n?' Va como '+f.name+' (mismo contenido): se abre y se recupera igual.':''));return true}
-catch(x){if(x&&x.name=='AbortError'){toast(o.cancel||'No se compartió el archivo.');return false}const r=await SVSAVE(n,data,o);return r!==false}}
+catch(x){if(x&&x.name=='AbortError'){toast(o.cancel||'No se compartió el archivo.');return false}const r=await SVSAVE(n,data,o);if(r!==false)setTimeout(()=>toast('No se pudo compartir: el archivo se guardó en el dispositivo (Descargas).'),300);return r!==false}}
 
 function saveFile0(name,text,mime){
   var manual=function(){showText(text,"No se pudo guardar el archivo aquí. Copia este texto y guárdalo en un archivo llamado "+name+".");};
@@ -1139,7 +1140,7 @@ function manSections(){
    '<li><b>Tandas.</b> Si hay menos tableros que partidas, la ronda se divide en tandas. La tanda B entra conforme se desocupen tableros; quienes esperan en una ronda juegan primero en la siguiente.</li>'+
    '<li><b>Captura resultados.</b> En cada mesa toca <span class="nw">1–0</span> (ganan blancas), <span class="nw">½–½</span> (tablas) o <span class="nw">0–1</span> (ganan negras). Para corregir, toca otra opción; si tocas la misma, se borra.</li>'+
    '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista.</li>'+
-   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero y resaltada; la otra siempre está. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
+   '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero (en el respaldo, siempre «Compartir…» primero) y resaltada; la otra siempre está. También pregunta en la tablet aunque Chrome la abra en modo escritorio. Si compartir falla, el archivo se guarda en el dispositivo y la app te avisa. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
    '<li><b>PDF de la ronda.</b> Hoja carta con las mesas de cada tanda: quién juega con blancas, quién con negras y un recuadro para anotar el resultado; abajo, quién descansa. Sirve para imprimirla y pegarla antes de empezar.</li>'+
    '<li><b>Deshacer esta ronda.</b> Está en su propio renglón, abajo, para no tocarlo por error. Borra los emparejamientos y resultados de la ronda actual; las anteriores se conservan.</li>'+
    '<li><b>Rondas anteriores.</b> Ábrelas con los botones R1, R2… Para cambiar un resultado toca “Corregir resultados”; los emparejamientos que ya se hicieron no cambian, solo los puntos.</li></ul>'],
