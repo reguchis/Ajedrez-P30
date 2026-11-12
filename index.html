@@ -525,7 +525,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.24"; window.__APPVER=VERSION;
+var VERSION="1.3.25"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -707,7 +707,7 @@ const fin=v=>{d.remove();removeEventListener('keydown',kd,true);if(v)svSet(k,v);
 d.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-sv]');if(b)return fin(b.dataset.sv);if(e.target===d)fin(null)});addEventListener('keydown',kd,true);
 document.body.appendChild(d)})}
 /* guarda o comparte un archivo: true si quedó guardado o compartido; false si se canceló */
-async function sOut(n,data,k,o){o=o||{};if(!svMov())return SVSAVE(n,data,o);const f=svFile(n,data);if(!f)return SVSAVE(n,data,o);
+async function sOut(n,data,k,o){o=o||{};if(!svMov())return SVSAVE(n,data,o);const f=svFile(n,data);if(!f){const r=await SVSAVE(n,data,o);if(r!==false&&navigator.share)setTimeout(()=>toast('Este tipo de archivo no se puede compartir desde el navegador: se guardó en el dispositivo (Descargas); compártelo desde ahí.'),300);return r}
 const c=await svAsk(k,n);if(!c){toast(o.cancel||'No se guardó ni se compartió el archivo.');return false}
 if(c=='dl'){const r=await SVSAVE(n,data,o);if(r!==false&&k=='bk')setTimeout(()=>toast('Respaldo guardado en el dispositivo. Guarda también una copia fuera de él (correo, Drive o WhatsApp a ti mismo).'),2200);return r!==false}
 try{await navigator.share({files:[f],title:o.title||n});toast((o.ok||'Archivo compartido: '+f.name)+(f.name!==n?' Va como '+f.name+' (mismo contenido): se abre y se recupera igual.':''));return true}
