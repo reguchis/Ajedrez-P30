@@ -1,6 +1,6 @@
 {
-  "name": "Torneo Suizo Escolar",
-  "short_name": "Torneo Suizo",
+  "name": "Ajedrez Escolar",
+  "short_name": "Ajedrez",
   "description": "Torneo de ajedrez escolar con sistema suizo: emparejamientos, resultados y posiciones, con o sin internet.",
   "lang": "es-MX",
   "id": "./",

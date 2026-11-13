@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Torneo Suizo Escolar</title>
+<title>Ajedrez Escolar</title>
 <meta name="description" content="Torneo de ajedrez escolar con sistema suizo: emparejamientos, resultados y posiciones, con o sin internet.">
 <meta name="author" content="Christian Reyes Guzmán">
 <meta name="theme-color" content="#2c6a49">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Torneo Suizo">
+<meta name="apple-mobile-web-app-title" content="Ajedrez">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -527,7 +527,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.32"; window.__APPVER=VERSION;
+var VERSION="1.3.33"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -695,7 +695,7 @@ FNM=(a,q,per,parts)=>[a,q,per===null?'':per||fnHoy(),...(parts||[]).map(x=>Strin
 function stamp(){var d=new Date(),z=function(n){return (n<10?"0":"")+n;};return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+"_"+z(d.getHours())+z(d.getMinutes());}
 function showText(txt,msg){ui.copy=txt;ui.copyMsg=msg;render();var ta=document.getElementById("copybox");if(ta){ta.focus();ta.select();}}
 /* 1.3.21: saveFile pregunta en el celular «Guardar en el dispositivo» (1.3.23: antes «… en el celular») o «Compartir…» (sOut); saveFile0 es la descarga de antes */
-function saveFile(name,text,mime){return sOut(name,text,/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'bk':'rep',{mime:mime,title:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo · Torneo Suizo':name,ok:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo compartido. Guárdalo fuera del dispositivo (correo, Drive o WhatsApp a ti mismo).':undefined,cancel:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo cancelado: no se guardó ninguna copia.':undefined});}
+function saveFile(name,text,mime){return sOut(name,text,/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'bk':'rep',{mime:mime,title:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo · Ajedrez':name,ok:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo compartido. Guárdalo fuera del dispositivo (correo, Drive o WhatsApp a ti mismo).':undefined,cancel:/^(torneo-respaldo|Ajedrez_Respaldo)_/.test(name)?'Respaldo cancelado: no se guardó ninguna copia.':undefined});}
 /* SALIDA (Guardar en el dispositivo / Compartir…): ver build/salida_js.py */
 const SVP='torneo-suizo-sv-',SVD={bk:'sh'},SVSAVE=(n,d,o)=>{if(d instanceof Blob){try{const u=URL.createObjectURL(d),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},1500);toast('Archivo listo: '+n)}catch(e){window.open(URL.createObjectURL(d),'_blank')}return true}saveFile0(n,d,o.mime||'application/octet-stream');return true};
 /* celular o tablet: también la tablet Android que Chrome abre «en modo escritorio» (pantalla táctil como puntero principal) */
@@ -1369,7 +1369,7 @@ function viewAj(){
 }
 function aboutHtml(){
   return '<details class="card" id="acerca"'+(ui.cards.acerca?" open":"")+'><summary><span>Acerca de la app <span class="sumv">· versión '+VERSION+'</span></span></summary><div class="about">'+
-    '<div class="apptitle"><b>Torneo Suizo Escolar</b><span>30 Santo Domingo · versión '+VERSION+'</span></div>'+
+    '<div class="apptitle"><b>Ajedrez Escolar</b><span>30 Santo Domingo · versión '+VERSION+'</span></div>'+
     '<div><h4>Creada por</h4><p><b>Christian Reyes Guzmán</b><br>Docente del Plantel 30 Santo Domingo<br>Colegio de Bachilleres de Chiapas</p></div>'+
     '<p class="motto">Hecha por un docente para docentes: organiza un torneo de ajedrez con emparejamientos automáticos en minutos, con o sin internet.</p>'+
     '<div><h4>Desarrollo</h4><p>Diseño, pruebas en el aula y criterio docente: Christian Reyes Guzmán.<br>Programación asistida por inteligencia artificial (Claude, de Anthropic).</p></div>'+
@@ -1532,7 +1532,7 @@ function posPdfPages(P){
   need(70);c.fillStyle="#56655c";c.font="13px "+PF;
   var nota="Desempates, en orden: partida entre ellos (cuando empatan dos); Bch (Buchholz, suma de puntos de los rivales; un descanso cuenta como un rival con tus mismos puntos); Bch-1 (Buchholz sin el rival más débil); Gan (partidas ganadas). 1 ganó, ½ tablas, 0 perdió, D descanso. El signo = marca un empate sin resolver.";
   var ws=nota.split(" "),ln2="",yy=y+18;ws.forEach(function(w){var t2=ln2?ln2+" "+w:w;if(c.measureText(t2).width>PW-2*PM){c.fillText(ln2,PM,yy);yy+=18;ln2=w;}else ln2=t2;});if(ln2)c.fillText(ln2,PM,yy);
-  pages.forEach(function(cv,i){var x=cv.getContext("2d");x.fillStyle="#8a968e";x.font="12px "+PF;x.textAlign="right";x.textBaseline="middle";x.fillText("Torneo Suizo Escolar · página "+(i+1)+" de "+pages.length,PW-PM,PH-28);x.textAlign="left";});
+  pages.forEach(function(cv,i){var x=cv.getContext("2d");x.fillStyle="#8a968e";x.font="12px "+PF;x.textAlign="right";x.textBaseline="middle";x.fillText("Ajedrez Escolar · página "+(i+1)+" de "+pages.length,PW-PM,PH-28);x.textAlign="left";});
   return pages;
 }
 function pdfBlob(pages){
@@ -1572,7 +1572,7 @@ function rndPdf(ri){
   }
   var by=rd.games.filter(function(g){return g.b==null;});
   if(by.length){need(60);y+=14;c.fillStyle="#14221a";c.font="bold 18px "+PF;c.fillText(pFit(c,"Descansa (1 punto): "+by.map(function(g){return who(g.w);}).join(", "),PW-2*PM),PM,y+16);y+=36}
-  pages.forEach(function(cv,i){var x=cv.getContext("2d");x.fillStyle="#8a968e";x.font="12px "+PF;x.textAlign="right";x.textBaseline="middle";x.fillText("Torneo Suizo Escolar · página "+(i+1)+" de "+pages.length,PW-PM,PH-28);x.textAlign="left";});
+  pages.forEach(function(cv,i){var x=cv.getContext("2d");x.fillStyle="#8a968e";x.font="12px "+PF;x.textAlign="right";x.textBaseline="middle";x.fillText("Ajedrez Escolar · página "+(i+1)+" de "+pages.length,PW-PM,PH-28);x.textAlign="left";});
   var b;try{b=pdfBlob(pages);}catch(e){return toast("No se pudo crear el PDF en este navegador.");}
   var name=FNM('Ajedrez','Ronda'+(ri+1),null)+".pdf",url=URL.createObjectURL(b);
   if(svMov()&&svFile(name,b)){URL.revokeObjectURL(url);sOut(name,b,'rep');return;}
