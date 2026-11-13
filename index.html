@@ -14,7 +14,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sumv{color:var(--muted);font-size:.8125rem;font-weight:400}
-</style>
+.prow .pgrp{flex:0 0 58px;width:58px;padding-left:4px;padding-right:4px;min-width:0;text-align:center;text-transform:uppercase}.prow .pgrp::placeholder{text-transform:none}#view::after{content:'';display:block;height:96px}body:has(#toast:not([hidden])) #navb{display:none}.row.pgf{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;align-items:stretch}.row.pgf>.btn,.row.pgf>.btn.primary{margin:0;width:100%;max-width:none;min-height:46px;padding:8px 6px;font-size:1rem}</style>
 <style>
 /* Layout: planilla de arbitraje en una columna; pestañas en una barra fija abajo, como en Asistencia y Tareas, y filas de mesa grandes para capturar con el pulgar. */
 :root{
@@ -97,7 +97,7 @@ p{margin:0}
 .note{color:var(--muted);font-size:.875rem;max-width:62ch}
 .stack{display:flex;flex-direction:column;gap:10px;min-width:0}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-/* 1.3.28: botones en columnas del mismo ancho */
+/* 1.3.30: botones en columnas del mismo ancho */
 .row.eq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 .between{justify-content:space-between}
 
@@ -185,7 +185,7 @@ tr.out td{color:var(--muted)}
 tr.top1 td{background:var(--felt-soft)}
 
 .plist{display:flex;flex-direction:column;gap:6px}
-.prow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.prow{display:grid;grid-template-columns:auto minmax(0,1fr) 58px auto;gap:8px;align-items:center}
 .prow .text{min-width:0}
 .sw{display:flex;align-items:center;gap:6px;font-size:.875rem;min-height:44px;cursor:pointer}
 .sw input{width:20px;height:20px;accent-color:var(--felt)}
@@ -275,7 +275,7 @@ h1{font-size:18px;line-height:1.2}
 .panel{padding:14px}
 summary{color:var(--ink)}
 #b-cfg-save{background:var(--felt);border-color:var(--felt);color:var(--on-felt);min-height:50px}
-#navb{position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-direction:column;gap:10px;pointer-events:none}#navb button{width:52px;height:52px;min-height:0;border-radius:50%;border:0;padding:0;font-size:26px;font-weight:700;line-height:1;background:var(--felt);color:var(--on-felt);opacity:0;transition:opacity .3s;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none}#navb.on button{opacity:.6;pointer-events:auto}#navb.on button:active,#navb.on button:focus-visible{opacity:1}#navb button[hidden]{display:none!important}@media (prefers-reduced-motion:reduce){#navb button{transition:none}}@media print{#navb{display:none!important}}
+#navb{position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;flex-direction:column;gap:10px;pointer-events:none}#navb button{width:46px;height:46px;min-height:0;border-radius:50%;border:0;padding:0;font-size:23px;font-weight:700;line-height:1;background:var(--felt);color:var(--on-felt);opacity:0;transition:opacity .3s;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none}#navb.on button{opacity:.5;pointer-events:auto}#navb.on button:active,#navb.on button:focus-visible{opacity:1}#navb button[hidden]{display:none!important}@media (prefers-reduced-motion:reduce){#navb button{transition:none}}@media print{#navb{display:none!important}}
 .r2b{display:flex;gap:8px}.r2b>.btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;width:auto;padding:6px 8px}
 </style>
 <script>try{var __t=localStorage.getItem('torneo-suizo-tema');if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t);}catch(e){}</script>
@@ -461,7 +461,7 @@ function standings(st){
     for(var k=0;k<s.bye;k++) op.push(s.pts);   // 1.3.7: el descanso cuenta como un rival con tus mismos puntos (antes 0)
     var buch=op.reduce(function(t,x){return t+x;},0);
     var cut1=op.length>1?buch-Math.min.apply(null,op):0;
-    return {id:p.id,name:p.name,active:p.active,pts:s.pts,buch:buch,cut1:cut1,win:s.win,res:s.res,played:s.opp.length+s.bye,dir:false,po:false,tie:false};
+    return {id:p.id,name:(p.name?p.name+(p.grupo?' ('+p.grupo+')':''):(p.grupo?'('+p.grupo+')':'')),grupo:gOf(p),active:p.active,pts:s.pts,buch:buch,cut1:cut1,win:s.win,res:s.res,played:s.opp.length+s.bye,dir:false,po:false,tie:false};
   });
   rows.sort(function(a,b){return b.pts-a.pts||b.buch-a.buch||b.cut1-a.cut1||b.win-a.win||a.id-b.id;});
   for(var i=0;i<rows.length-1;i++){
@@ -527,7 +527,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.28"; window.__APPVER=VERSION;
+var VERSION="1.3.32"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -594,14 +594,17 @@ function deferRender(){
 
 /* ---------- Utilidades de vista ---------- */
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function pname(id){for(var i=0;i<state.players.length;i++){if(state.players[i].id===id)return state.players[i].name||"";}return "";}
+function pname(id){for(var i=0;i<state.players.length;i++){var p=state.players[i];if(p.id===id)return (p.name?p.name+(p.grupo?' ('+p.grupo+')':''):(p.grupo?'('+p.grupo+')':''));}return "";}
+/* 1.3.30: grupo escolar opcional de cada jugador (ej. 3B); sale entre paréntesis junto al nombre */
+function gOf(p){return String(p&&p.grupo||"").trim();}
 function activeCount(){return state.players.filter(function(p){return p.active;}).length;}
 function tandasPerRound(){return Math.max(1,Math.ceil(Math.floor(activeCount()/2)/Math.max(1,state.boards)));}
 function fmtDur(min){var h=Math.floor(min/60),m=min%60;return (h?h+" h ":"")+(m||!h?m+" min":"").trim();}
 function estimate(){return 10+state.rounds*tandasPerRound()*(state.minutes+5);}
 function fmtPts(p2){var w=Math.floor(p2/2);return p2%2?(w?w+"½":"½"):String(w);}
 function toast(msg){
-  var t=document.getElementById("toast"); t.textContent=msg; t.hidden=false;
+  var t=document.getElementById("toast"); t.textContent=msg; t.hidden=false; t.t0=Date.now();
+  if(!toast.sc){toast.sc=1;addEventListener("scroll",function(){var w=document.getElementById("toast");if(w&&!w.hidden&&Date.now()-w.t0>1500)w.hidden=true;},{passive:true});}
   clearTimeout(toast.tm); toast.tm=setTimeout(function(){t.hidden=true;},2600);
 }
 var dis=function(){return readOnly?" disabled":"";};
@@ -786,7 +789,11 @@ function shuffle(a){
   return a;
 }
 function sorteoNames(){
-  return ui.sorteoText.split(/\r?\n/).map(function(l){return l.split("\t").map(function(c){return c.trim();}).filter(Boolean).join(" ").replace(/\s+/g," ").trim();}).filter(Boolean).slice(0,200);
+  var GR=/^\d{1,2}\s?[A-Za-zÑñ]{1,2}$/;
+  return ui.sorteoText.split(/\r?\n/).map(function(l){var c=l.split("\t").map(function(x){return x.trim();}).filter(Boolean),g="";
+    if(c.length>1&&GR.test(c[c.length-1]))g=c.pop().replace(/\s+/g,"").toUpperCase();
+    var n=c.join(" ").replace(/\s+/g," ").trim();if(!g){var m=n.match(/^(.*?)[,;]\s*(\d{1,2}\s?[A-Za-zÑñ]{1,2})$/);if(m){n=m[1].trim();g=m[2].replace(/\s+/g,"").toUpperCase();}}
+    return {n:n,g:g};}).filter(function(x){return x.n;}).slice(0,200);
 }
 
 /* ---------- Salir de la app ---------- */
@@ -1082,13 +1089,18 @@ function viewPos(){
   }else{
     h+='<h2>Posiciones <small>tras '+n+(n===1?" ronda":" rondas")+'</small></h2>';
   }
+  h+='<section class="panel">';
+  (function(){var G2=[];rows.forEach(function(r){if(r.grupo&&G2.indexOf(r.grupo)<0)G2.push(r.grupo);});G2.sort(function(a,b){return a.localeCompare(b,"es",{numeric:true});});
+    if(G2.length>1){var cur=G2.indexOf(ui.pg)>=0?ui.pg:"";h+='<div class="row pgf" role="group" aria-label="Ver posiciones por grupo"><button type="button" class="btn'+(cur?'':' primary')+'" data-act="pg" data-v="">Todos</button>'+G2.map(function(g){return '<button type="button" class="btn'+(cur===g?' primary':'')+'" data-act="pg" data-v="'+esc(g)+'">'+esc(g)+'</button>';}).join("")+'</div>'+(cur?'<p class="note">Solo '+esc(cur)+'. El lugar es el del torneo completo.</p>':'');}})();
+  if(n&&rows.length>=8)h+=qBox("pq");
   h+='<p class="note" id="tblhint" hidden>Desliza la tabla → para ver todas las columnas.</p><div class="tablewrap"><table><thead><tr><th>Lugar</th><th>No.</th><th style="text-align:left">Alumno</th>';
   for(var i=0;i<Math.max(n,1);i++) h+='<th>R'+(i+1)+'</th>';
   h+='<th>Pts</th><th title="Buchholz">Bch</th><th title="Buchholz sin el rival más débil">Bch-1</th><th title="Partidas ganadas">Gan</th></tr></thead><tbody>';
-  var anyTie=false;
-  rows.forEach(function(r,idx){
+  var anyTie=false,GS=[];rows.forEach(function(r){if(r.grupo&&GS.indexOf(r.grupo)<0)GS.push(r.grupo);});GS.sort(function(a,b){return a.localeCompare(b,"es",{numeric:true});});
+  var PG=GS.indexOf(ui.pg)>=0?ui.pg:"";
+  rows.forEach(function(r,idx){if(PG&&r.grupo!==PG)return;
     if(r.tie) anyTie=true;
-    h+='<tr class="'+(r.active?"":"out ")+(idx===0&&fin&&!nf?"top1":"")+'"><td class="place">'+(n?r.place+(r.tie?"=":""):"–")+'</td><td>'+r.id+'</td>'+
+    h+='<tr data-q="'+esc(qN(r.id+" "+r.name+" "+(r.grupo||"")))+'" class="'+(r.active?"":"out ")+(idx===0&&fin&&!nf?"top1":"")+'"><td class="place">'+(n?r.place+(r.tie?"=":""):"–")+'</td><td>'+r.id+'</td>'+
        '<td class="name">'+(r.name?esc(r.name):"—")+(r.active?"":" (retirado)")+'</td>';
     for(var k=0;k<Math.max(n,1);k++) h+='<td>'+(r.res[k]||"–")+'</td>';
     h+='<td class="pts">'+fmtPts(r.pts)+'</td><td>'+fmtPts(r.buch)+'</td><td>'+fmtPts(r.cut1)+'</td><td>'+r.win+'</td></tr>';
@@ -1099,16 +1111,28 @@ function viewPos(){
   h+='<div class="row eq"><button type="button" class="btn" id="b-copys" data-act="copy-s">Copiar posiciones</button>'+
      '<button type="button" class="btn" id="b-csv" data-act="csv">Exportar a Excel (CSV)</button>'+
      (n?'<button type="button" class="btn" id="b-pdf" data-act="pdf">PDF de posiciones</button>':'')+
-     (n?'<button type="button" class="btn" id="b-projpos" data-act="proj-open" data-v="pos">Modo proyector</button>':'')+'</div>'+copyBox();
+     (n?'<button type="button" class="btn" id="b-projpos" data-act="proj-open" data-v="pos">Modo proyector</button>':'')+'</div>'+copyBox()+'</section>';
   return h;
 }
+/* 1.3.31: buscar jugador por nombre, número o grupo (sin importar acentos ni mayúsculas). Solo oculta renglones: no cambia nada. */
+function qN(x){return String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
+function qBox(id){return '<div class="field"><label for="'+id+'">Buscar jugador</label><input class="text" id="'+id+'" type="search" autocomplete="off" placeholder="Nombre, número o grupo" value="'+esc(ui.q||"")+'"><p class="note" id="'+id+'n" hidden></p></div>';}
+function qApply(){var q=qN(ui.q).trim(),W=q?q.split(/\s+/):[],L=document.querySelectorAll("[data-q]"),k=0;
+  for(var i=0;i<L.length;i++){var t=L[i].getAttribute("data-q"),ok=W.every(function(w){return /^\d+$/.test(w)?(" "+t+" ").indexOf(" "+w+" ")>=0:t.indexOf(w)>=0;});L[i].style.display=ok?"":"none";if(ok)k++;}
+  ["jq","pq"].forEach(function(id){var n=document.getElementById(id+"n");if(n){n.hidden=!q;n.textContent=k?(k===1?"1 jugador":k+" jugadores"):"Ningún jugador coincide";}});}
 function viewJug(){
   var started=state.rondas.length>0;
-  var h='<h2>Jugadores <small>'+activeCount()+' juegan</small></h2>'+
+  /* 1.3.30: Jugadores dentro de tarjetas, como Tareas y Asistencia */
+  var h='<section class="panel"><h2>Jugadores <small>'+activeCount()+' juegan</small></h2>'+
     '<p class="lead">El número es el del sorteo; escribe el nombre cuando sepas a quién le tocó. Desmarca “Juega” si alguien falta o se retira y deja de entrar al emparejamiento.</p>';
   if(!started&&!readOnly){
-    h+='<details id="sorteo"'+(ui.sorteo?" open":"")+'><summary>Sorteo automático de números</summary>'+
-      '<p>Pega la lista de alumnos, uno por renglón; puedes copiarla de Excel. La app reparte los números al azar y ajusta la cantidad de jugadores.</p>'+
+    h+='<div class="row eq"><button type="button" class="btn" id="b-pegar" data-act="pegar">Pegar lista de alumnos</button><label class="btn" for="in-asis" style="justify-content:center">Traer de Asistencia</label><input type="file" id="in-asis" accept=".json,.txt,application/json,text/plain" hidden></div>';
+    if(ui.asis){
+      h+='<div class="banner" id="asisv"><p><b>'+esc(ui.asis.src)+'</b>: elige los grupos que juegan.</p>'+ui.asis.groups.map(function(g,i){return '<label class="sw" style="display:flex;margin:6px 0"><input type="checkbox" class="asg" data-i="'+i+'"'+(g.on?" checked":"")+'> '+esc(g.name)+' ('+g.n+(g.n===1?' alumno':' alumnos')+')</label>';}).join("")+
+         '<div class="row"><button type="button" class="btn primary" id="b-asis-ok" data-act="asis-ok">Usar estos alumnos</button><button type="button" class="btn" id="b-asis-no" data-act="asis-no">Cancelar</button></div></div>';
+    }
+    h+='</section><details id="sorteo"'+(ui.sorteo?" open":"")+'><summary>Sorteo automático de números</summary>'+
+      '<p>Pega la lista de alumnos, uno por renglón; puedes copiarla de Excel. Si pones el grupo después del nombre (separado por tabulador o coma, ej. «María López, 3B»), queda como su grupo. La app reparte los números al azar y ajusta la cantidad de jugadores.</p>'+
       '<textarea id="in-sorteo" aria-label="Lista de alumnos para el sorteo" placeholder="María Fernanda López&#10;José Ángel Pérez&#10;…">'+esc(ui.sorteoText)+'</textarea>'+
       '<div class="row" style="margin-top:10px"><button type="button" class="btn primary" id="b-sortear" data-act="'+(state.players.some(function(p){return p.name;})?"ask":"sortear")+'" data-c="sorteo">Sortear números</button></div>';
     if(ui.confirm==="sorteo"){
@@ -1117,10 +1141,12 @@ function viewJug(){
     }
     h+='</details>';
   }
-  h+='<div class="plist">';
+  if(started||readOnly) h+='</section>';
+  h+='<section class="panel">'+(state.players.length>=8?qBox("jq"):'')+'<div class="plist">';
   state.players.forEach(function(p){
-    h+='<div class="prow"><b class="num">'+p.id+'</b>'+
+    h+='<div class="prow" data-q="'+esc(qN(p.id+" "+p.name+" "+(p.grupo||"")))+'"><b class="num">'+p.id+'</b>'+
        '<input class="text pname" id="nombre-'+p.id+'" data-id="'+p.id+'" type="text" autocomplete="off" maxlength="60" placeholder="Nombre del alumno" aria-label="Nombre del jugador '+p.id+'" value="'+esc(p.name)+'"'+dis()+'>'+
+       '<input class="text pgrp" id="grupo-'+p.id+'" data-id="'+p.id+'" type="text" autocomplete="off" maxlength="8" placeholder="Grupo" aria-label="Grupo del jugador '+p.id+'" value="'+esc(p.grupo||"")+'"'+dis()+'>'+
        '<label class="sw"><input type="checkbox" class="pact" id="act-'+p.id+'" data-id="'+p.id+'"'+(p.active?" checked":"")+dis()+'> Juega</label></div>';
   });
   h+='</div>';
@@ -1128,7 +1154,7 @@ function viewJug(){
     h+='<div class="row"><button type="button" class="btn" id="b-addp" data-act="addp">Agregar jugador '+(state.players.length+1)+'</button></div>';
     if(started) h+='<p class="note">Quien se agrega con el torneo empezado entra con 0 puntos desde la siguiente ronda.</p>';
   }
-  h+='<div class="row"><button type="button" class="btn" id="b-copyp" data-act="copy-p">Copiar jugadores</button></div>'+copyBox();
+  h+='<div class="row"><button type="button" class="btn" id="b-copyp" data-act="copy-p">Copiar jugadores</button></div>'+copyBox()+'</section>';
   return h;
 }
 function manSections(){
@@ -1138,11 +1164,14 @@ function manSections(){
    '<ol>'+
    '<li><b>Configura.</b> La app empieza en 2 jugadores, 1 tablero, 1 ronda y 15 minutos por tanda. En la pestaña Ronda ajusta esos valores a tu torneo; la app te dice cuántas rondas recomienda y te avisa si pusiste más de las que caben sin repetir rival. Si pones el máximo, juegan todos contra todos. Abajo aparece la vista previa de la ronda 1.</li>'+
    '<li><b>Sortea los números.</b> Cada alumno saca su número, o pega la lista en Jugadores › Sorteo automático y la app los reparte al azar. Los nombres se pueden escribir antes o después de empezar.</li>'+
+   '<li><b>Tarjetas.</b> Jugadores y Posiciones se ven en tarjetas, igual que Ronda y Ajustes y que las apps de Asistencia y Tareas.</li><li><b>Buscar jugador.</b> Con 8 jugadores o más, en Jugadores y en Posiciones escribe parte del nombre, el número o el grupo (sin importar acentos ni mayúsculas) y solo quedan a la vista los que coinciden. No cambia nada del torneo: borra lo escrito (✕) para verlos todos. En Posiciones se combina con los botones de grupo.</li>'+
+   '<li><b>Grupo de cada jugador (opcional).</b> En Jugadores, junto al nombre, escribe su grupo (ej. 3B). Sale entre paréntesis en los emparejamientos, las posiciones, los PDF, el CSV y lo que copias. Si el torneo mezcla grupos, en Posiciones aparecen botones para ver la tabla de un solo grupo (el lugar sigue siendo el del torneo completo; el PDF y el CSV llevan a todos).</li>'+
+   '<li><b>Pegar lista y Traer de Asistencia.</b> Antes de iniciar, en Jugadores: «Pegar lista de alumnos» abre el sorteo para pegarla (si después del nombre pones el grupo separado por tabulador o coma, ej. «María López, 3B», queda como su grupo). «Traer de Asistencia» lee el respaldo de Asistencia (o de Tareas): eliges los grupos que juegan y sus alumnos pasan al sorteo con su grupo; revisas la lista y tocas «Sortear números».</li>'+
    '<li><b>Marca ausentes.</b> En Jugadores desmarca “Juega” a quien no llegó, antes de iniciar.</li>'+
    '<li><b>Inicia el torneo.</b> Toca “Iniciar torneo” y sienta a los alumnos según su mesa. El primero de cada mesa lleva blancas.</li></ol>'+
    '<p><b>Pestañas</b></p><ul>'+
    '<li><b>Barra de abajo.</b> Ronda · Posiciones · Jugadores · Ajustes están siempre abajo, a la mano del pulgar, como en las apps de Asistencia y Tareas. Cada pestaña se abre desde arriba; si tocas la pestaña donde ya estás, la pantalla se queda como está.</li>'+
-   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo y <b>la pantalla se mueve con él</b>: a la izquierda, la siguiente; a la derecha, la anterior. Si la sueltas antes de llegar lejos, regresa a su lugar; en la primera y en la última cede un poco y regresa (no da la vuelta). El encabezado y los botones de abajo se quedan quietos. Si el aparato no deja guardar este ajuste (o el Tema), la app lo avisa y el ajuste vale mientras siga abierta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Subir y bajar.</b> En las pantallas largas (por ejemplo, Posiciones o Jugadores con muchos alumnos), al desplazarte aparecen abajo a la derecha, uno arriba del otro, dos botones redondos y transparentes: <b>↑</b> te lleva arriba y <b>↓</b> baja casi una pantalla. Se desvanecen solos a los 2 segundos sin moverte; para verlos otra vez, mueve un poco la pantalla.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
+   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo y <b>la pantalla se mueve con él</b>: a la izquierda, la siguiente; a la derecha, la anterior. Si la sueltas antes de llegar lejos, regresa a su lugar; en la primera y en la última cede un poco y regresa (no da la vuelta). El encabezado y los botones de abajo se quedan quietos. Si el aparato no deja guardar este ajuste (o el Tema), la app lo avisa y el ajuste vale mientras siga abierta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Subir y bajar.</b> En las pantallas largas (por ejemplo, Posiciones o Jugadores con muchos alumnos), al desplazarte aparecen abajo a la derecha, uno arriba del otro, dos botones redondos y transparentes: <b>↑</b> te lleva arriba y <b>↓</b> baja casi una pantalla. Se desvanecen solos a los 2 segundos sin moverte; para verlos otra vez, mueve un poco la pantalla. Se esconden mientras hay un aviso abajo; los avisos se quitan solos o al desplazarte.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el aparato); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
    '<li><b>Fecha, hora y docente.</b> En Ronda, arriba, ves el día, la fecha, la hora y “Docente: tu nombre”. En Posiciones, Jugadores y Ajustes, un renglón con la fecha y la hora. La hora cambia sola. Si falta tu nombre, Ronda te avisa; escríbelo en Ajustes › Configuración.</li></ul>'+
    '<p><b>Botones de arriba</b></p><ul>'+
    '<li><b>⏻ Salir</b> (a la izquierda): pregunta “¿Salir de la app?”; con Confirmar aparece “Saliste de la app” y la app intenta cerrarse. Tu torneo queda guardado. Si el teléfono no deja cerrarla, te dice cómo salir; “Volver a entrar” te regresa a Ronda. También puedes salir desde Ajustes › Salir.</li>'+
@@ -1385,6 +1414,7 @@ function render(){
   if(byeShown){var bh2=document.getElementById("byeh"); if(bh2) bh2.hidden=false;}
   renderProj();
   tblHint();
+  qApply();
   if(keep){var el=document.getElementById(keep); if(el&&el!==document.activeElement){try{el.focus({preventScroll:true});}catch(e){}}}
   syncWake();
 }
@@ -1427,7 +1457,7 @@ function roundText(ri){
 }
 function playersText(){
   var out=[(state.name||"Torneo")+" · Jugadores ("+activeCount()+" juegan)",""];
-  state.players.forEach(function(p){out.push("No. "+p.id+" · "+(p.name||"(sin nombre)")+(p.active?"":" (no juega)"));});
+  state.players.forEach(function(p){out.push("No. "+p.id+" · "+(p.name||"(sin nombre)")+(gOf(p)?" ("+gOf(p)+")":"")+(p.active?"":" (no juega)"));});
   return out.join("\n");
 }
 function standingsText(){
@@ -1448,7 +1478,7 @@ function copyText(txt){
    con el campeón y los lugares arriba. Si una ronda está a medias, el PDF sale con la anterior completa. */
 var PW=1000,PH=1294,PM=56,PF='"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
 function pFit(c,t,w){t=String(t);if(c.measureText(t).width<=w)return t;while(t.length>1&&c.measureText(t+"…").width>w)t=t.slice(0,-1);return t+"…";}
-function pdfDate(){var d=new Date(),M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],z=function(n){return (n<10?"0":"")+n;};return d.getDate()+" de "+M[d.getMonth()]+" de "+d.getFullYear()+", "+z(d.getHours())+":"+z(d.getMinutes());}
+function pdfDate(){var d=new Date(),M=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],z=function(n){return (n<10?"0":"")+n;};return z(d.getDate())+"/"+z(d.getMonth()+1)+"/"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes());}
 function posPdfData(){
   var k=0;for(var i=0;i<state.rondas.length;i++){if(roundDone(state.rondas[i]))k=i+1;else break;}
   if(!k) return null;
@@ -1457,7 +1487,7 @@ function posPdfData(){
   return {k:k,M:Math.max(st.rounds,k),rows:rows,fin:fin,nf:fin?needFinal(st,rows):null,rd:st.rondas[k-1]};
 }
 function posPdfPages(P){
-  var pages=[],c,y,pn=0,who=function(id){if(id==null)return "";var p=null;state.players.forEach(function(q){if(q.id===id)p=q;});return "No. "+id+(p&&p.name?" · "+p.name:"");};
+  var pages=[],c,y,pn=0,who=function(id){if(id==null)return "";var p=null;state.players.forEach(function(q){if(q.id===id)p=q;});return "No. "+id+(p&&(p.name||p.grupo)?" · "+(function(p){return (p.name?p.name+(p.grupo?' ('+p.grupo+')':''):(p.grupo?'('+p.grupo+')':''));})(p):"");};
   var title=(state.name||"Torneo de Ajedrez Escolar"),sub=P.fin?"Posiciones finales":"Posiciones después de la ronda "+P.k+" de "+P.M;
   function page(){var cv=document.createElement("canvas");cv.width=PW;cv.height=PH;c=cv.getContext("2d");c.fillStyle="#fff";c.fillRect(0,0,PW,PH);c.textBaseline="middle";pages.push(cv);pn++;
     if(pn===1){c.fillStyle="#2c6a49";c.fillRect(PM,40,PW-2*PM,6);c.fillStyle="#14221a";c.font="bold 30px "+PF;c.fillText(pFit(c,title,PW-2*PM),PM,84);
@@ -1519,7 +1549,7 @@ function pdfBlob(pages){
 /* 1.3.12: PDF de la ronda: hoja carta con las mesas de cada tanda (blancas, negras y un espacio para el resultado) y quién descansa */
 function rndPdf(ri){
   var rd=state.rondas[ri];if(!rd) return;
-  var pages=[],c,y,pn=0,who=function(id){var p=null;state.players.forEach(function(q){if(q.id===id)p=q;});return "No. "+id+(p&&p.name?" · "+p.name:"");};
+  var pages=[],c,y,pn=0,who=function(id){var p=null;state.players.forEach(function(q){if(q.id===id)p=q;});return "No. "+id+(p&&(p.name||p.grupo)?" · "+(function(p){return (p.name?p.name+(p.grupo?' ('+p.grupo+')':''):(p.grupo?'('+p.grupo+')':''));})(p):"");};
   var title=(state.name||"Torneo de Ajedrez Escolar"),sub="Emparejamientos · Ronda "+(ri+1)+" de "+Math.max(state.rounds,state.rondas.length);
   function page(){var cv=document.createElement("canvas");cv.width=PW;cv.height=PH;c=cv.getContext("2d");c.fillStyle="#fff";c.fillRect(0,0,PW,PH);c.textBaseline="middle";pages.push(cv);pn++;
     if(pn===1){c.fillStyle="#2c6a49";c.fillRect(PM,40,PW-2*PM,6);c.fillStyle="#14221a";c.font="bold 30px "+PF;c.fillText(pFit(c,title,PW-2*PM),PM,84);c.font="bold 24px "+PF;c.fillStyle="#2c6a49";c.fillText(sub,PM,124);
@@ -1710,7 +1740,7 @@ function act(a,d){
       var names=sorteoNames();
       if(names.length<2){ui.confirm=null;render();toast("Pega al menos dos nombres, uno por renglón.");return;}
       shuffle(names);
-      mutate(function(s){s.players=names.map(function(nm,i){return {id:i+1,name:nm,active:true};});});
+      mutate(function(s){s.players=names.map(function(x,i){var p={id:i+1,name:x.n,active:true};if(x.g)p.grupo=x.g;return p;});});
       ui.confirm=null; ui.sorteoText=""; ui.sorteo=false; render();
       toast("Números sorteados para "+names.length+" alumnos. Revisa la lista."); break;
     case "undo": ui.confirm=null; ui.round=null; mutate(function(s){s.rondas.pop();s.playoff=null;if(!s.rondas.length)s.rr=null;}); tReset(); render(); break;
@@ -1739,6 +1769,17 @@ function act(a,d){
       try{if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();}catch(e){}
       mutate(function(s){if(ni) s.name=ni.value; if(di) s.docente=di.value;});
       toast("Guardado"); break;
+    case "pegar": ui.sorteo=true; render(); setTimeout(function(){var t=document.getElementById("in-sorteo");if(t){t.focus();try{t.scrollIntoView({block:"center"})}catch(z){}}},60); break;
+    case "asis-no": ui.asis=null; render(); break;
+    case "asis-ok":
+      if(!ui.asis) return;
+      var A=ui.asis,G=A.groups.filter(function(g){return g.on;});
+      if(!G.length) return toast("Elige al menos un grupo.");
+      var L=[];G.forEach(function(g){g.st.forEach(function(nm){L.push(nm+"\t"+g.name);});});
+      ui.sorteoText=L.join("\n");ui.asis=null;ui.sorteo=true;render();
+      toast(L.length+" alumnos listos en «Sorteo automático»: revisa y toca «Sortear números».");
+      setTimeout(function(){var t=document.getElementById("b-sortear");if(t)try{t.scrollIntoView({block:"center"})}catch(z){}},60); break;
+    case "pg": ui.pg=d.v||""; render(); break;
     case "addp": mutate(function(s){s.players.push({id:s.players.length+1,name:"",active:true});}); break;
     case "po": mutate(function(s){s.playoff={ids:String(d.ids).split(",").map(Number),winner:+d.w};}); break;
     case "po-clear": mutate(function(s){s.playoff=null;}); break;
@@ -1770,9 +1811,14 @@ document.addEventListener("input",function(e){
   if(t.classList&&t.classList.contains("pname")){
     var id=+t.dataset.id;
     mutate(function(s){s.players.forEach(function(p){if(p.id===id)p.name=t.value;});},true);
+  }else if(t.classList&&t.classList.contains("pgrp")){
+    var gid=+t.dataset.id;
+    mutate(function(s){s.players.forEach(function(p){if(p.id===gid)p.grupo=t.value.trim().toUpperCase().slice(0,8);});},true);
   }else if(t.id==="askw"){
     ui.askOk=t.value.replace(/\s+/g,"").toUpperCase()==="BORRAR";
     var bs=document.getElementById("b-borrar-si"); if(bs) bs.disabled=!ui.askOk;
+  }else if(t.id==="jq"||t.id==="pq"){
+    ui.q=t.value; qApply();
   }else if(t.id==="in-sorteo"){
     ui.sorteoText=t.value;
   }else if(t.id==="in-doc"){
@@ -1791,6 +1837,22 @@ document.addEventListener("change",function(e){
     mutate(function(s){s.players.forEach(function(p){if(p.id===id)p.active=t.checked;});});
   }else if(t.dataset&&t.dataset.k&&t.type==="number"){
     setNum(t.dataset.k,parseInt(t.value,10));
+  }else if(t.classList&&t.classList.contains("asg")&&ui.asis){
+    ui.asis.groups[+t.dataset.i].on=t.checked;
+  }else if(t.id==="in-asis"&&t.files&&t.files[0]){
+    var fa=new FileReader();
+    fa.onload=function(){
+      t.value="";
+      try{var o=JSON.parse(String(fa.result));if(o&&o.torneo)throw 0;
+        if(!o||!Array.isArray(o.groups)||!Array.isArray(o.students))throw 0;
+        var src=Array.isArray(o.sessions)?"Respaldo de Asistencia":"Respaldo de Tareas";
+        var groups=o.groups.map(function(g){var st=o.students.filter(function(x){return x&&x.gid===g.id&&!x.baja&&!x.out&&x.name;}).map(function(x){return String(x.name).trim();}).sort(function(a,b){return a.localeCompare(b,"es");});return {name:String(g.name||"").trim(),n:st.length,st:st,on:false};}).filter(function(g){return g.n;});
+        groups.sort(function(a,b){return a.name.localeCompare(b.name,"es",{numeric:true});});
+        if(!groups.length)return toast("Ese respaldo no tiene alumnos.");
+        ui.asis={src:src,groups:groups};render();
+      }catch(z){toast("Ese archivo no es un respaldo de Asistencia ni de Tareas (Asistencia: Ajustes › Exportar respaldo).");}
+    };
+    fa.readAsText(t.files[0]);
   }else if(t.id==="in-restore"&&t.files&&t.files[0]){
     var fr=new FileReader();
     fr.onload=function(){
