@@ -14,7 +14,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}.sumv{color:var(--muted);font-size:.8125rem;font-weight:400}
-.prow .pgrp{flex:0 0 58px;width:58px;padding-left:4px;padding-right:4px;min-width:0;text-align:center;text-transform:uppercase}.prow .pgrp::placeholder{text-transform:none}#view::after{content:'';display:block;height:96px}body:has(#toast:not([hidden])) #navb{display:none}.row.pgf{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;align-items:stretch}.row.pgf>.btn,.row.pgf>.btn.primary{margin:0;width:100%;max-width:none;min-height:46px;padding:8px 6px;font-size:1rem}</style>
+.prow .pgrp{flex:0 0 58px;width:58px;padding-left:4px;padding-right:4px;min-width:0;text-align:center;text-transform:uppercase}.prow .pgrp::placeholder{text-transform:none}#view::after{content:'';display:block;height:96px}body:has(#toast:not([hidden])) #navb{display:none}.row.pgf{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;align-items:stretch}.row.pgf>.btn,.row.pgf>.btn.primary{margin:0;width:100%;max-width:none;min-height:46px;padding:8px 6px;font-size:1rem}div.clockbar>.btn.btn{flex:0 0 112px;width:112px;margin:0}.row.rbt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.row.rbt>.btn{width:100%;max-width:none;margin:0}.row.rbt>.btn:first-child{grid-column:1/-1}@media(min-width:600px){.row.rbt{grid-template-columns:repeat(3,minmax(0,1fr))}.row.rbt>.btn:first-child{grid-column:auto}}@media(max-width:599px){div.clockbar.clockbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}div.clockbar>.clock,div.clockbar>.lbl{grid-column:1/-1}div.clockbar>.btn.btn{width:100%;flex:none;margin:0}}.eqr.eqr{display:flex!important;flex-wrap:wrap;justify-content:center;gap:8px;--c:var(--cp,2)}
+.eqr.eqr>*{flex:0 0 calc((100% - (var(--c) - 1)*8px)/var(--c))!important;width:auto!important;max-width:none!important;min-width:0!important;margin:0!important;grid-column:auto!important}
+.row.pgf.eqr{--cp:4}.pj-bar.eqr.eqr{flex:0 0 auto;width:min(100%,620px)}.pj-bar.eqr>*{white-space:nowrap;text-align:center;justify-content:center}@media(min-width:600px){.eqr.eqr{--c:var(--cw,4)}}
+</style>
 <style>
 /* Layout: planilla de arbitraje en una columna; pestañas en una barra fija abajo, como en Asistencia y Tareas, y filas de mesa grandes para capturar con el pulgar. */
 :root{
@@ -527,7 +530,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.33"; window.__APPVER=VERSION;
+var VERSION="1.3.35"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -826,7 +829,7 @@ function exitApp(){
 /* ---------- Modo proyector ---------- */
 function projHtml(){
   var n=state.rondas.length,top='';
-  var bar='<div class="pj-bar" role="group" aria-label="Vista del proyector">'+
+  var bar='<div class="pj-bar eqr" style="--cw:4" role="group" aria-label="Vista del proyector">'+
     '<button type="button" class="chip" id="pj-pairs" data-act="proj-view" data-v="pairs" aria-pressed="'+(ui.projView==="pairs")+'">Emparejamientos</button>'+
     '<button type="button" class="chip" id="pj-pos" data-act="proj-view" data-v="pos" aria-pressed="'+(ui.projView==="pos")+'">Posiciones</button>'+
     '<button type="button" class="chip" id="pj-full" data-act="proj-full">Pantalla completa</button>'+
@@ -1047,7 +1050,7 @@ function viewRonda(){
       h+='<button type="button" class="btn primary wide" id="b-next" data-act="next"'+(all&&!readOnly?"":" disabled")+'>Emparejar ronda '+(state.rondas.length+1)+'</button>';
       if(!all) h+='<p class="note">Faltan '+(real.length-doneN)+' resultados para emparejar la siguiente ronda.</p>';
     }
-    h+='<div class="row"><button type="button" class="btn" id="b-copyr" data-act="copy-r">Copiar emparejamientos</button><button type="button" class="btn" id="b-pdfr" data-act="pdf-r">PDF de la ronda</button><button type="button" class="btn" id="b-proj" data-act="proj-open" data-v="pairs">Modo proyector</button></div>';
+    h+='<div class="row rbt eqr" style="--cw:3"><button type="button" class="btn" id="b-copyr" data-act="copy-r">Copiar emparejamientos</button><button type="button" class="btn" id="b-pdfr" data-act="pdf-r">PDF de la ronda</button><button type="button" class="btn" id="b-proj" data-act="proj-open" data-v="pairs">Modo proyector</button></div>';
     if(!readOnly) h+='<div class="row undo-row"><button type="button" class="btn danger" id="b-askundo" data-act="ask" data-c="undo">Deshacer esta ronda</button></div>';
     if(ui.confirm==="undo"){
       h+='<div class="banner buff"><p>Se borran los emparejamientos y resultados de la ronda '+(last+1)+'. Las rondas anteriores se conservan.</p>'+
@@ -1055,7 +1058,7 @@ function viewRonda(){
     }
     h+='</div>';
   }else{
-    h+='<div class="row"><button type="button" class="btn" id="b-copyr" data-act="copy-r">Copiar emparejamientos</button><button type="button" class="btn" id="b-pdfr" data-act="pdf-r">PDF de la ronda</button><button type="button" class="btn" id="b-proj" data-act="proj-open" data-v="pairs">Modo proyector</button></div>';
+    h+='<div class="row rbt eqr" style="--cw:3"><button type="button" class="btn" id="b-copyr" data-act="copy-r">Copiar emparejamientos</button><button type="button" class="btn" id="b-pdfr" data-act="pdf-r">PDF de la ronda</button><button type="button" class="btn" id="b-proj" data-act="proj-open" data-v="pairs">Modo proyector</button></div>';
   }
   h+=copyBox();
   return h;
@@ -1091,7 +1094,7 @@ function viewPos(){
   }
   h+='<section class="panel">';
   (function(){var G2=[];rows.forEach(function(r){if(r.grupo&&G2.indexOf(r.grupo)<0)G2.push(r.grupo);});G2.sort(function(a,b){return a.localeCompare(b,"es",{numeric:true});});
-    if(G2.length>1){var cur=G2.indexOf(ui.pg)>=0?ui.pg:"";h+='<div class="row pgf" role="group" aria-label="Ver posiciones por grupo"><button type="button" class="btn'+(cur?'':' primary')+'" data-act="pg" data-v="">Todos</button>'+G2.map(function(g){return '<button type="button" class="btn'+(cur===g?' primary':'')+'" data-act="pg" data-v="'+esc(g)+'">'+esc(g)+'</button>';}).join("")+'</div>'+(cur?'<p class="note">Solo '+esc(cur)+'. El lugar es el del torneo completo.</p>':'');}})();
+    if(G2.length>1){var cur=G2.indexOf(ui.pg)>=0?ui.pg:"";h+='<div class="row pgf eqr" style="--cw:'+eqC(G2.length+1,[4,5,6,7,8],8)+'" role="group" aria-label="Ver posiciones por grupo"><button type="button" class="btn'+(cur?'':' primary')+'" data-act="pg" data-v="">Todos</button>'+G2.map(function(g){return '<button type="button" class="btn'+(cur===g?' primary':'')+'" data-act="pg" data-v="'+esc(g)+'">'+esc(g)+'</button>';}).join("")+'</div>'+(cur?'<p class="note">Solo '+esc(cur)+'. El lugar es el del torneo completo.</p>':'');}})();
   if(n&&rows.length>=8)h+=qBox("pq");
   h+='<p class="note" id="tblhint" hidden>Desliza la tabla → para ver todas las columnas.</p><div class="tablewrap"><table><thead><tr><th>Lugar</th><th>No.</th><th style="text-align:left">Alumno</th>';
   for(var i=0;i<Math.max(n,1);i++) h+='<th>R'+(i+1)+'</th>';
@@ -1115,6 +1118,8 @@ function viewPos(){
   return h;
 }
 /* 1.3.31: buscar jugador por nombre, número o grupo (sin importar acentos ni mayúsculas). Solo oculta renglones: no cambia nada. */
+/* columnas en pantalla ancha: las que dejen menos huecos (n = cuántos botones; L = opciones; d = preferida si empatan) */
+function eqC(n,L,d){if(n<=L[L.length-1]&&n>=L[0])return n;var b=d,bh=1e9;L.forEach(function(c){var h=(c-n%c)%c;if(h<bh||(h===bh&&Math.abs(c-d)<Math.abs(b-d))){bh=h;b=c;}});return b;}
 function qN(x){return String(x||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();}
 function qBox(id){return '<div class="field"><label for="'+id+'">Buscar jugador</label><input class="text" id="'+id+'" type="search" autocomplete="off" placeholder="Nombre, número o grupo" value="'+esc(ui.q||"")+'"><p class="note" id="'+id+'n" hidden></p></div>';}
 function qApply(){var q=qN(ui.q).trim(),W=q?q.split(/\s+/):[],L=document.querySelectorAll("[data-q]"),k=0;
@@ -1164,7 +1169,7 @@ function manSections(){
    '<ol>'+
    '<li><b>Configura.</b> La app empieza en 2 jugadores, 1 tablero, 1 ronda y 15 minutos por tanda. En la pestaña Ronda ajusta esos valores a tu torneo; la app te dice cuántas rondas recomienda y te avisa si pusiste más de las que caben sin repetir rival. Si pones el máximo, juegan todos contra todos. Abajo aparece la vista previa de la ronda 1.</li>'+
    '<li><b>Sortea los números.</b> Cada alumno saca su número, o pega la lista en Jugadores › Sorteo automático y la app los reparte al azar. Los nombres se pueden escribir antes o después de empezar.</li>'+
-   '<li><b>Tarjetas.</b> Jugadores y Posiciones se ven en tarjetas, igual que Ronda y Ajustes y que las apps de Asistencia y Tareas.</li><li><b>Buscar jugador.</b> Con 8 jugadores o más, en Jugadores y en Posiciones escribe parte del nombre, el número o el grupo (sin importar acentos ni mayúsculas) y solo quedan a la vista los que coinciden. No cambia nada del torneo: borra lo escrito (✕) para verlos todos. En Posiciones se combina con los botones de grupo.</li>'+
+   '<li><b>Tarjetas.</b> Jugadores y Posiciones se ven en tarjetas, igual que Ronda y Ajustes y que las apps de Asistencia y Tareas. Los botones de cada fila (grupos, ronda, reloj, proyector) miden igual; si el último renglón queda incompleto, se centra.</li><li><b>Buscar jugador.</b> Con 8 jugadores o más, en Jugadores y en Posiciones escribe parte del nombre, el número o el grupo (sin importar acentos ni mayúsculas) y solo quedan a la vista los que coinciden. No cambia nada del torneo: borra lo escrito (✕) para verlos todos. En Posiciones se combina con los botones de grupo.</li>'+
    '<li><b>Grupo de cada jugador (opcional).</b> En Jugadores, junto al nombre, escribe su grupo (ej. 3B). Sale entre paréntesis en los emparejamientos, las posiciones, los PDF, el CSV y lo que copias. Si el torneo mezcla grupos, en Posiciones aparecen botones para ver la tabla de un solo grupo (el lugar sigue siendo el del torneo completo; el PDF y el CSV llevan a todos).</li>'+
    '<li><b>Pegar lista y Traer de Asistencia.</b> Antes de iniciar, en Jugadores: «Pegar lista de alumnos» abre el sorteo para pegarla (si después del nombre pones el grupo separado por tabulador o coma, ej. «María López, 3B», queda como su grupo). «Traer de Asistencia» lee el respaldo de Asistencia (o de Tareas): eliges los grupos que juegan y sus alumnos pasan al sorteo con su grupo; revisas la lista y tocas «Sortear números».</li>'+
    '<li><b>Marca ausentes.</b> En Jugadores desmarca “Juega” a quien no llegó, antes de iniciar.</li>'+
