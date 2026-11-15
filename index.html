@@ -96,8 +96,8 @@ h2 small{font-family:var(--body);font-weight:500;font-size:.95rem;color:var(--mu
 h3{font-family:var(--body);font-weight:600;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
 h3 small{letter-spacing:0;text-transform:none;font-weight:400;font-size:.875rem}
 p{margin:0}
-.lead{color:var(--muted);max-width:62ch}
-.note{color:var(--muted);font-size:.875rem;max-width:62ch}
+.lead{color:var(--muted)}
+.note{color:var(--muted);font-size:.875rem}
 .stack{display:flex;flex-direction:column;gap:10px;min-width:0}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 /* 1.3.30: botones en columnas del mismo ancho */
@@ -130,7 +130,7 @@ p{margin:0}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--felt);outline-offset:2px}
 
-.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media (orientation:landscape) and (min-width:700px){.settings{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .field label,.lbl{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .stepper{display:grid;grid-template-columns:44px 1fr 44px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
@@ -197,8 +197,8 @@ summary{font-weight:600;cursor:pointer;list-style:none;display:flex;justify-cont
 summary::-webkit-details-marker{display:none}
 summary::after{content:'▸';color:var(--muted);font-size:18px;padding-left:10px;flex:none}
 details[open]>summary::after{content:'▾'}
-details ol,details ul{margin:10px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;max-width:62ch}
-details p{margin-top:12px;max-width:62ch}
+details ol,details ul{margin:10px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+details p{margin-top:12px}
 /* manual */
 .manhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .manidx{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
@@ -217,7 +217,7 @@ label.btn{display:inline-flex;align-items:center}
 .about p{max-width:52ch;margin-inline:auto}
 .about .tech{display:flex;flex-direction:column;align-items:center;gap:4px}
 .motto{font-style:italic}
-.warn{color:var(--danger);font-size:.875rem;font-weight:600;max-width:62ch}
+.warn{color:var(--danger);font-size:.875rem;font-weight:600}
 /* modo proyector */
 .proj{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--ink);overflow:auto;
   padding:calc(16px + env(safe-area-inset-top,0px)) 24px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px;font-size:clamp(16px,1.55vw,30px)}
@@ -530,7 +530,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.37"; window.__APPVER=VERSION;
+var VERSION="1.3.38"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
