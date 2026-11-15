@@ -282,6 +282,7 @@ summary{color:var(--ink)}
 .r2b{display:flex;gap:8px}.r2b>.btn{flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;width:auto;padding:6px 8px}
 </style>
 <script>try{var __t=localStorage.getItem('torneo-suizo-tema');if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t);}catch(e){}</script>
+<style>/* 1.3.41: el texto de los botones siempre centrado, aunque baje de renglón */.btn,button{text-align:center}</style>
 </head>
 <body>
 
@@ -530,7 +531,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.40"; window.__APPVER=VERSION;
+var VERSION="1.3.41"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1202,7 +1203,7 @@ function manSections(){
    '<li><b>Premia.</b> Al terminar aparecen el campeón y los lugares. Si dos o más empatan en primer lugar, la app pide el resultado de la final de desempate: toca el número de quien ganó.</li>'+
    '<li><b>Guardar respaldo.</b> Al terminar el torneo, el aviso trae el botón “Guardar respaldo” para conservarlo (sección 9).</li>'+
    '<li><b>Copiar posiciones</b> y <b>Exportar a Excel (CSV)</b> para compartir o llevar la tabla a tu Excel.</li>'+
-   '<li><b>Se lee bien en los dos temas</b> (desde la 1.3.40): todos los textos tienen buen contraste (4.5 a 1 o más).</li><li><b>Colores de los PDF</b> (desde la 1.3.39): el PDF de la ronda y el de posiciones llevan el título, los subtítulos y los encabezados de tabla en azul marino, con una línea roja bajo el título: los colores institucionales del COBACH (#09094D y #8A0404), los mismos de los reportes de Asistencia y Tareas.</li><li><b>PDF de posiciones.</b> Genera una hoja carta lista para imprimir o publicar. A mitad del torneo dice «Posiciones después de la ronda 3 de 5» y trae los resultados de esa ronda, mesa por mesa (quién jugó con blancas y con negras, y quién ganó), y la tabla de posiciones. Al terminar dice «Posiciones finales» y pone arriba al campeón y el segundo y tercer lugar. Si una ronda está a medias, el PDF sale con la última ronda completa. Si son muchos alumnos, sigue en otra hoja.</li></ul>'],
+   '<li><b>Botones y tablas centrados</b> (desde la 1.3.41): el texto de los botones va centrado aunque baje de renglón, y los títulos de las columnas de los PDF de ronda y de posiciones van centrados.</li><li><b>Se lee bien en los dos temas</b> (desde la 1.3.40): todos los textos tienen buen contraste (4.5 a 1 o más).</li><li><b>Colores de los PDF</b> (desde la 1.3.39): el PDF de la ronda y el de posiciones llevan el título, los subtítulos y los encabezados de tabla en azul marino, con una línea roja bajo el título: los colores institucionales del COBACH (#09094D y #8A0404), los mismos de los reportes de Asistencia y Tareas.</li><li><b>PDF de posiciones.</b> Genera una hoja carta lista para imprimir o publicar. A mitad del torneo dice «Posiciones después de la ronda 3 de 5» y trae los resultados de esa ronda, mesa por mesa (quién jugó con blancas y con negras, y quién ganó), y la tabla de posiciones. Al terminar dice «Posiciones finales» y pone arriba al campeón y el segundo y tercer lugar. Si una ronda está a medias, el PDF sale con la última ronda completa. Si son muchos alumnos, sigue en otra hoja.</li></ul>'],
   ["Jugadores",
    '<ul>'+
    '<li><b>Número y nombre.</b> El número es el del sorteo; escribe el nombre cuando sepas a quién le tocó.</li>'+
@@ -1503,7 +1504,7 @@ function posPdfPages(P){
     else{c.fillStyle="#56655c";c.font="bold 16px "+PF;c.fillText(pFit(c,title+" · "+sub+" (cont. "+pn+")",PW-2*PM),PM,44);y=74}}
   function need(h,rep){if(y+h>PH-50){page();if(rep)rep();}}
   function sec(t){need(64);y+=14;c.fillStyle="#09094D";c.font="bold 21px "+PF;c.fillText(t,PM,y+14);y+=36}
-  function hdr(cols){c.fillStyle="#09094D";c.fillRect(PM,y,PW-2*PM,32);c.fillStyle="#ffffff";c.font="bold 15px "+PF;var x=PM;cols.forEach(function(q){var w=q[1];c.textAlign=q[2]||"left";c.fillText(pFit(c,q[0],w-12),q[2]==="center"?x+w/2:x+8,y+16);c.textAlign="left";x+=w;});y+=32}
+  function hdr(cols){c.fillStyle="#09094D";c.fillRect(PM,y,PW-2*PM,32);c.fillStyle="#ffffff";c.font="bold 15px "+PF;var x=PM;cols.forEach(function(q){var w=q[1];c.textAlign="center";c.fillText(pFit(c,q[0],w-12),x+w/2,y+16);c.textAlign="left";x+=w;});y+=32}
   function row(cols,vals,o){o=o||{};var h=30;if(o.bg){c.fillStyle=o.bg;c.fillRect(PM,y,PW-2*PM,h);}var x=PM;cols.forEach(function(q,i){var w=q[1];c.fillStyle=o.col&&o.col[i]?o.col[i]:o.mute?"#5b6470":"#14221a";c.font=((o.bold&&o.bold[i])?"bold ":"")+"15px "+PF;c.textAlign=q[2]||"left";c.fillText(pFit(c,vals[i],w-12),q[2]==="center"?x+w/2:x+8,y+h/2);c.textAlign="left";x+=w;});
     c.strokeStyle="#d4e0d6";c.lineWidth=1;c.beginPath();c.moveTo(PM,y+h+.5);c.lineTo(PW-PM,y+h+.5);c.stroke();y+=h}
   page();
@@ -1563,7 +1564,7 @@ function rndPdf(ri){
       c.fillStyle="#56655c";c.font="16px "+PF;c.fillText(pFit(c,((state.docente||"").trim()?"Docente: "+state.docente.trim()+"   ·   ":"")+"Generado: "+pdfDate(),PW-2*PM),PM,156);c.fillText("El primero de cada mesa juega con blancas. Al terminar, avisen el resultado.",PM,182);y=212}
     else{c.fillStyle="#56655c";c.font="bold 16px "+PF;c.fillText(pFit(c,title+" · "+sub+" (cont. "+pn+")",PW-2*PM),PM,44);y=74}}
   var GC=[["Mesa",90,"center"],["Blancas",(PW-2*PM-90-150)/2],["Resultado",150,"center"],["Negras",(PW-2*PM-90-150)/2]];
-  function hdr(){c.fillStyle="#09094D";c.fillRect(PM,y,PW-2*PM,40);c.fillStyle="#ffffff";c.font="bold 17px "+PF;var x=PM;GC.forEach(function(q){c.textAlign=q[2]||"left";c.fillText(q[0],q[2]==="center"?x+q[1]/2:x+10,y+20);c.textAlign="left";x+=q[1];});y+=40}
+  function hdr(){c.fillStyle="#09094D";c.fillRect(PM,y,PW-2*PM,40);c.fillStyle="#ffffff";c.font="bold 17px "+PF;var x=PM;GC.forEach(function(q){c.textAlign="center";c.fillText(q[0],x+q[1]/2,y+20);c.textAlign="left";x+=q[1];});y+=40}
   function need(h){if(y+h>PH-60){page();hdr();}}
   function row(v,res){var h=46,x=PM;GC.forEach(function(q,i){c.fillStyle="#14221a";c.font=(i===0?"bold 20px ":"18px ")+PF;
       if(i===2&&!res){c.strokeStyle="#9aa59d";c.lineWidth=1.5;c.strokeRect(x+25,y+9,q[1]-50,h-18);}
