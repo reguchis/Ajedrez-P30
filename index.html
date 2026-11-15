@@ -266,7 +266,7 @@ textarea{width:100%;min-height:160px;border:1px solid var(--line);border-radius:
   .clockbar .lbl{display:none}
 }
 /* 1.3.17: mismo aspecto que Asistencia y Tareas (letra del sistema 15px, fondo gris claro, tarjetas blancas, barra y botones del mismo tamaño); el verde del tablero se conserva */
-:root{--bg:#f4f6f9;--surface:#fff;--ink:#14213d;--muted:#64748b;--line:#e2e8f0;--display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:root{--bg:#f4f6f9;--surface:#fff;--ink:#14213d;--muted:#596374;--line:#e2e8f0;--display:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f172a;--surface:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155}}
 :root[data-theme="dark"]{--bg:#0f172a;--surface:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155}
 body{font-size:15px}
@@ -530,7 +530,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.3.39"; window.__APPVER=VERSION;
+var VERSION="1.3.40"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1202,7 +1202,7 @@ function manSections(){
    '<li><b>Premia.</b> Al terminar aparecen el campeón y los lugares. Si dos o más empatan en primer lugar, la app pide el resultado de la final de desempate: toca el número de quien ganó.</li>'+
    '<li><b>Guardar respaldo.</b> Al terminar el torneo, el aviso trae el botón “Guardar respaldo” para conservarlo (sección 9).</li>'+
    '<li><b>Copiar posiciones</b> y <b>Exportar a Excel (CSV)</b> para compartir o llevar la tabla a tu Excel.</li>'+
-   '<li><b>Colores de los PDF</b> (desde la 1.3.39): el PDF de la ronda y el de posiciones llevan el título, los subtítulos y los encabezados de tabla en azul marino, con una línea roja bajo el título: los colores institucionales del COBACH (#09094D y #8A0404), los mismos de los reportes de Asistencia y Tareas.</li><li><b>PDF de posiciones.</b> Genera una hoja carta lista para imprimir o publicar. A mitad del torneo dice «Posiciones después de la ronda 3 de 5» y trae los resultados de esa ronda, mesa por mesa (quién jugó con blancas y con negras, y quién ganó), y la tabla de posiciones. Al terminar dice «Posiciones finales» y pone arriba al campeón y el segundo y tercer lugar. Si una ronda está a medias, el PDF sale con la última ronda completa. Si son muchos alumnos, sigue en otra hoja.</li></ul>'],
+   '<li><b>Se lee bien en los dos temas</b> (desde la 1.3.40): todos los textos tienen buen contraste (4.5 a 1 o más).</li><li><b>Colores de los PDF</b> (desde la 1.3.39): el PDF de la ronda y el de posiciones llevan el título, los subtítulos y los encabezados de tabla en azul marino, con una línea roja bajo el título: los colores institucionales del COBACH (#09094D y #8A0404), los mismos de los reportes de Asistencia y Tareas.</li><li><b>PDF de posiciones.</b> Genera una hoja carta lista para imprimir o publicar. A mitad del torneo dice «Posiciones después de la ronda 3 de 5» y trae los resultados de esa ronda, mesa por mesa (quién jugó con blancas y con negras, y quién ganó), y la tabla de posiciones. Al terminar dice «Posiciones finales» y pone arriba al campeón y el segundo y tercer lugar. Si una ronda está a medias, el PDF sale con la última ronda completa. Si son muchos alumnos, sigue en otra hoja.</li></ul>'],
   ["Jugadores",
    '<ul>'+
    '<li><b>Número y nombre.</b> El número es el del sorteo; escribe el nombre cuando sepas a quién le tocó.</li>'+
