@@ -151,6 +151,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .clockbar .lbl{order:-1;flex:none}
 
 .games{display:flex;flex-direction:column;gap:8px}
+/* 1.4.1: resaltado al completar una ronda o una tanda */
+.hf-ok{--hf:rgba(22,163,74,.6)}.hf-pe{--hf:rgba(217,119,6,.6)}.hf{animation:ajhf 2.4s ease-out;border-radius:12px}@keyframes ajhf{0%,55%{box-shadow:0 0 0 4px var(--hf)}100%{box-shadow:0 0 0 4px transparent}}h3[id^=th-],.banner{scroll-margin-top:80px}
 .game{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
 .mesa{display:flex;flex-direction:column;align-items:center;line-height:1.1}
 .mesa span{font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -456,6 +458,18 @@ function direct(st,a,b){
   return w;
 }
 function roundDone(rd){return rd.games.every(function(g){return g.res!=null;});}
+/* 1.4.1: ¿ya están todos los resultados de esa tanda? */
+function tandaDone(ri,t){var r=state.rondas[ri];if(!r)return false;var L=r.games.filter(function(g){return g.tanda===t&&g.b!=null;});return L.length>0&&L.every(function(g){return g.res!=null;});}
+/* 1.4.1: lleva la pantalla a lo que sigue y lo ilumina unos segundos (respeta «reducir movimiento» del aparato) */
+function ajFoc(k,ri,t){setTimeout(function(){if(ui.tab!=="ronda")return;var el=null,c="hf-ok",sm="smooth";
+  try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)sm="auto";}catch(e){}
+  var vis=function(e){if(!e)return false;var r=e.getBoundingClientRect();return r.top>=60&&r.bottom<=innerHeight-150;};
+  if(k==="fin"){var b=document.getElementById("b-gopos");el=b&&b.closest(".banner");}
+  else if(k==="next"){var bb=document.getElementById("b-next"),bt=document.getElementById("b-next-top");el=vis(bb)?bb:(bt&&bt.closest(".banner"))||bb;}
+  else{el=document.getElementById("tg-"+ri+"-"+t);c="hf-pe";}
+  if(!el)return;
+  if(!vis(el)){try{(k==="tanda"?document.getElementById("th-"+ri+"-"+t)||el:el).scrollIntoView({behavior:sm,block:k==="tanda"?"start":"center"});}catch(e){}}
+  el.classList.remove("hf","hf-ok","hf-pe");void el.offsetWidth;el.classList.add("hf",c);setTimeout(function(){el.classList.remove("hf",c);},2600);},40);}
 function finished(st){return st.rondas.length>0&&st.rondas.length>=st.rounds&&st.rondas.every(roundDone);}
 function standings(st){
   var S=stats(st);
@@ -531,7 +545,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.4.0"; window.__APPVER=VERSION;
+var VERSION="1.4.1"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -986,10 +1000,10 @@ function gamesHtml(games,ri,editable,preview){
     games.forEach(function(g,gi){if(g.tanda===t)list.push({g:g,gi:gi});});
     list.sort(function(a,b){return a.g.mesa-b.g.mesa;});
     if(nT>1){
-      h+='<h3>Tanda '+LETTERS[t]+' <small>· '+list.length+(list.length===1?" partida":" partidas")+
+      h+='<h3'+(preview?'':' id="th-'+ri+'-'+t+'"')+'>Tanda '+LETTERS[t]+' <small>· '+list.length+(list.length===1?" partida":" partidas")+
         (t>0?" · entran conforme se desocupen tableros":"")+'</small></h3>';
     }
-    h+='<div class="games">'+list.map(function(x){return gameHtml(x.g,ri,x.gi,editable,preview);}).join("")+'</div>';
+    h+='<div class="games"'+(preview||nT<2?'':' id="tg-'+ri+'-'+t+'"')+'>'+list.map(function(x){return gameHtml(x.g,ri,x.gi,editable,preview);}).join("")+'</div>';
   }
   games.forEach(function(g){
     if(g.b==null){var nm=pname(g.w);h+='<p class="bye">Descansa <b>'+g.w+(nm?" · "+esc(nm):"")+'</b> y recibe 1 punto.</p>';}
@@ -1187,7 +1201,8 @@ function manSections(){
    '<li><b>Reloj de tanda.</b> Toca “Iniciar” cuando todos empiecen. El tiempo es por partida, no por jugador. Suena un aviso cuando falta 1 minuto y otro al terminar; las partidas abiertas se definen por material (sección 7).</li>'+
    '<li><b>Tandas.</b> Si hay menos tableros que partidas, la ronda se divide en tandas. La tanda B entra conforme se desocupen tableros; quienes esperan en una ronda juegan primero en la siguiente.</li>'+
    '<li><b>Captura resultados.</b> En cada mesa toca <span class="nw">1–0</span> (ganan blancas), <span class="nw">½–½</span> (tablas) o <span class="nw">0–1</span> (ganan negras). Para corregir, toca otra opción; si tocas la misma, se borra.</li>'+
-   '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista.</li>'+
+   '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista. Desde la 1.4.1 la pantalla te lleva al botón más cercano (o a “Torneo terminado”, en la última ronda) y lo ilumina en verde unos segundos.</li>'+
+   '<li><b>Fin de una tanda.</b> Si la ronda tiene tandas, al capturar el último resultado de una tanda la pantalla baja al inicio de la siguiente y la ilumina en ámbar: son las partidas que siguen. Mientras capturas resultados sueltos, la pantalla no se mueve.</li>'+
    '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero (en el respaldo, siempre «Compartir…» primero) y resaltada; la otra siempre está. También pregunta en la tablet aunque Chrome la abra en modo escritorio. «Compartir…» abre el menú de Android o iPhone en ese mismo toque. Si el navegador no lo abre, la app te dice la razón y te deja tocar «Compartir…» otra vez o guardarlo en el dispositivo: nunca se guarda sin preguntarte. <b>Nombres de los archivos</b>: Ajedrez_Qué_Fecha_Hora, por ejemplo Ajedrez_Respaldo_2026-11-12_0950.json o Ajedrez_Posiciones_Ronda3_2026-11-12_0950.pdf, igual que en tus otras apps. Los respaldos con el nombre anterior (torneo-respaldo_…) se siguen abriendo igual. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
    '<li><b>PDF de la ronda.</b> Hoja carta con las mesas de cada tanda: quién juega con blancas, quién con negras y un recuadro para anotar el resultado; abajo, quién descansa. Sirve para imprimirla y pegarla antes de empezar.</li>'+
    '<li><b>Deshacer esta ronda.</b> Está en su propio renglón, abajo, para no tocarlo por error. Borra los emparejamientos y resultados de la ronda actual; las anteriores se conservan.</li>'+
@@ -1696,11 +1711,16 @@ function act(a,d){
       var ri=+d.ri,gi=+d.gi;
       if(ri!==state.rondas.length-1&&!ui.unlock) return;
       var wasDone=roundDone(state.rondas[state.rondas.length-1]);
+      var gT=state.rondas[ri]&&state.rondas[ri].games[gi]?state.rondas[ri].games[gi].tanda:0,wasT=tandaDone(ri,gT);
       mutate(function(s){var g=s.rondas[ri]&&s.rondas[ri].games[gi]; if(!g||g.b==null) return; g.res=g.res===d.r?null:d.r; s.playoff=null;});
       var lastR=state.rondas[state.rondas.length-1];
       if(ri===state.rondas.length-1&&!wasDone&&roundDone(lastR)){
         tReset(); render();
         toast(finished(state)?"Torneo terminado. Revisa Posiciones.":"Ronda completa: ya puedes emparejar la ronda "+(state.rondas.length+1)+".");
+        ajFoc(finished(state)?"fin":"next");
+      }else if(ri===state.rondas.length-1&&!wasT&&tandaDone(ri,gT)){
+        var nx=state.rondas[ri].games.some(function(g){return g.tanda===gT+1&&g.b!=null&&g.res==null;});
+        if(nx) ajFoc("tanda",ri,gT+1);
       }
       break;
     case "next":
