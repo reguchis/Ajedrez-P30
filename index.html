@@ -551,7 +551,7 @@ function bkMark(){try{localStorage.setItem(BK_KEY,String(Date.now()));}catch(e){
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid var(--buff)"><h2>Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este aparato.')+' El torneo vive solo en este aparato: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn wide" id="b-bk-now" data-act="backup">Guardar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.4.2"; window.__APPVER=VERSION;
+var VERSION="1.4.3"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1236,7 +1236,7 @@ function manSections(){
   ["Ajustes",
    '<ul>'+
    '<li><b>Orden de Ajustes.</b> Todas las tarjetas empiezan plegadas para no tocar nada por error; tócalas para abrirlas. Están en secciones con título (desde la 1.3.36), de lo más usado a lo más delicado: <b>Tu app</b> (Configuración) · <b>Tus datos</b> (Protección de mis datos y Respaldo) · <b>Ayuda e información</b> (Ayuda, Actualizaciones y Acerca de la app) · <b>Salir y borrar</b> (Salir y Borrar datos).</li>'+
-   '<li><b>Configuración.</b> Por dentro va en tres partes: «Datos del torneo», «Partidas» y «Pantalla» (tema y deslizar). Nombre del torneo y docente que organiza: escríbelos y toca <b>Guardar</b>; tu nombre aparece arriba de Ronda, en Copiar posiciones y en el CSV (también se guarda solo mientras escribes). Mientras falte tu nombre, Configuración se abre sola al entrar a Ajustes. Además, jugadores, tableros, rondas y minutos por tanda. Un cambio de tableros reacomoda la ronda actual solo si aún no tiene resultados. Antes de iniciar, estos mismos valores también están en la pestaña Ronda.</li>'+
+   '<li><b>Configuración.</b> Por dentro va en tres partes: «Datos del torneo», «Partidas» y «Pantalla» (tema y deslizar). Nombre del torneo y docente que organiza: escríbelos y toca <b>Guardar</b>; tu nombre aparece arriba de Ronda, en Copiar posiciones y en el CSV (también se guarda solo mientras escribes). Mientras falte tu nombre, Configuración se abre sola al entrar a Ajustes. Desde la 1.4.3, si el torneo no tiene docente y en este mismo sitio tienes la app de Asistencia (o la de Tareas), la app toma de ahí tu nombre una sola vez y te avisa; puedes cambiarlo cuando quieras. Además, jugadores, tableros, rondas y minutos por tanda. Un cambio de tableros reacomoda la ronda actual solo si aún no tiene resultados. Antes de iniciar, estos mismos valores también están en la pestaña Ronda.</li>'+
    '<li><b>Protección de mis datos.</b> Al cerrarla, su título ya dice «protegidos» (en verde) o «sin proteger» (en rojo). Dentro dice si la app está instalada y si el navegador guarda sus datos de forma permanente. Si no están protegidos, explica por qué y cómo instalarla; «Proteger mis datos» le pide al navegador que no borre el torneo al limpiar el historial ni cuando le falta espacio. La forma segura es instalar la app y abrirla siempre desde su ícono; aun así, guarda un respaldo del torneo.</li>'+
    '<li><b>Restablecer configuración</b> (en Borrar datos, arriba de «Nuevo torneo desde cero»). No borra el torneo: después de mostrarte la lista y pedir confirmación, vuelve el nombre del torneo a «Torneo de Ajedrez Escolar», deja vacío el docente y pone 1 tablero y 15 minutos por tanda. Si la ronda actual aún no tiene resultados, sus mesas se reacomodan como al cambiar los tableros a mano.</li>'+
    '<li><b>Respaldo.</b> Con el torneo iniciado, si no has guardado un respaldo en los últimos 7 días aparece arriba de Ronda la tarjeta «Respaldo pendiente» con el botón «Guardar respaldo ahora» (no sale en solo lectura ni con el torneo guardado en la nube). Si el aparato no pudo guardar el torneo (sin espacio o navegación privada), queda un aviso rojo arriba: guarda un respaldo en ese momento. “Guardar respaldo” descarga un archivo con todo el torneo; “Restaurar (recuperar) un respaldo…” lo recupera desde el archivo; si el archivo es igual al torneo que ya tienes, la app avisa que no hay nada que recuperar (sección 9). Antes de restaurar, la app dice de qué fecha y hora es el respaldo y cómo va (ronda y resultados), junto a cómo va el torneo que tienes ahora; si el actual va más adelante, te lo advierte (desde la 1.4.2).</li>'+
@@ -1328,7 +1328,7 @@ function updInner(){
   return '<p>Versión <b>'+VERSION+'</b>.</p><p class="note">Este enlace siempre abre la versión más reciente.</p>';
 }
 function viewAj(){
-  var h='<h2>Ajustes</h2>';
+  var h='';   /* 1.4.3: sin título grande, como Asistencia y Tareas */
   var cfg=SBT('Datos del torneo',1)+'<div class="field"><label for="in-name">Nombre del torneo</label>'+
     '<input class="text" id="in-name" type="text" maxlength="80" value="'+esc(state.name)+'"'+dis()+'></div>'+
     '<div class="field"><label for="in-doc">Docente que organiza</label>'+
@@ -1916,6 +1916,16 @@ window.addEventListener("storage",function(e){
 
 render();
 initCloud();
+/* 1.4.3: si el torneo no tiene docente, se propone una sola vez el de tu app de Asistencia (o de Tareas), si están en este mismo sitio */
+(function(){try{if(readOnly||(state.docente||"").trim()||localStorage.getItem("torneo-suizo-docprop")||!indexedDB||!indexedDB.databases)return;}catch(e){return;}
+  function lee(n){return new Promise(function(res){try{var r=indexedDB.open(n);r.onupgradeneeded=function(){try{r.transaction.abort();}catch(e){}res("");};r.onerror=function(){res("");};r.onblocked=function(){res("");};
+    r.onsuccess=function(){var db=r.result;try{if(!db.objectStoreNames.contains("kv")){db.close();return res("");}var q=db.transaction("kv","readonly").objectStore("kv").get("cfg");q.onsuccess=function(){db.close();var c=q.result;res(c&&c.v&&c.v.doc?String(c.v.doc).trim():"");};q.onerror=function(){db.close();res("");};}catch(e){try{db.close();}catch(z){}res("");}};}catch(e){res("");}});}
+  indexedDB.databases().then(function(L){var N=(L||[]).map(function(d){return d.name;});var A=[["asis","Asistencia"],["tareasg","Tareas"]].filter(function(x){return N.indexOf(x[0])>=0;});
+    var i=0;(function sig(){if(i>=A.length)return;var x=A[i++];lee(x[0]).then(function(v){if(!v)return sig();if((state.docente||"").trim())return;
+      try{localStorage.setItem("torneo-suizo-docprop","1");}catch(e){}
+      mutate(function(s){s.docente=v;});if(ui.cfgAuto){ui.cards.cfgc=false;ui.cfgAuto=false;render();}
+      toast("Docente tomado de tu app de "+x[1]+": "+v+". Puedes cambiarlo en Ajustes › Configuración.");});})();}).catch(function(){});
+})();
 try{var __pv=localStorage.getItem('torneo-suizo-ver');if(__pv&&__pv!==VERSION)setTimeout(function(){toast('App actualizada a la versión '+VERSION);},700);localStorage.setItem('torneo-suizo-ver',VERSION);}catch(e){}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});}catch(e){}   /* 1.3.12 */
 })();
