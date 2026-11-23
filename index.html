@@ -284,10 +284,9 @@ summary{color:var(--ink)}
 </style>
 <script>try{var __t=localStorage.getItem('torneo-suizo-tema');if(__t==='light'||__t==='dark')document.documentElement.setAttribute('data-theme',__t);}catch(e){}</script>
 <style>/* 1.3.41: el texto de los botones siempre centrado, aunque baje de renglón */.btn,button{text-align:center}</style>
-<style>/* 1.4.7: portada de Ronda con las mismas medidas que Hoy de Asistencia */.hd{align-items:center;padding:0;margin:4px 0 2px}.hd .dia{font-size:22px;font-weight:800;line-height:1.15;margin:0}.hd .fec{font-size:15px;line-height:1.3;margin:2px 0 0}.hd .hora{font-size:34px;font-weight:800;letter-spacing:.5px;line-height:1.15;margin:0}.hd .hora small{font-size:15px;font-weight:700}.dcl{margin:6px 0 0;color:var(--muted)}.dcl b{color:var(--ink)}
+<style>/* 1.4.8: portada de Ronda con las mismas medidas que Hoy de Asistencia */.hd{align-items:center;padding:0;margin:4px 0 2px}.hd .dia{font-size:22px;font-weight:800;line-height:1.15;margin:0}.hd .fec{font-size:15px;line-height:1.3;margin:2px 0 0}.hd .hora{font-size:34px;font-weight:800;letter-spacing:.5px;line-height:1.15;margin:0}.hd .hora small{font-size:15px;font-weight:700}.dcl{margin:6px 0 0;color:var(--muted)}.dcl b{color:var(--ink)}
 @media(min-width:600px){.hd .dia{font-size:26px}.hd .fec{font-size:15px}.hd .hora{font-size:40px}}
-/* 1.4.7: fecha de la portada siempre en un renglón, igual en las tres apps */.hd{flex-wrap:wrap;column-gap:8px;row-gap:2px}.hd .dd,.hd .fec{white-space:nowrap}
-@media(max-width:599px){.hd .dd,.hd .fec{font-size:clamp(12px,3.7vw,15px)}.hd .hr,.hd .hora{font-size:clamp(26px,8.2vw,34px)}.hd .hr small,.hd .hora small{font-size:clamp(12px,3.7vw,15px)}}</style>
+/* 1.4.8: fecha de la portada en un renglón, con el tamaño original de Asistencia (15 px fecha, 34 px hora) */.hd{flex-wrap:wrap;column-gap:8px;row-gap:2px}.hd .dd,.hd .fec{white-space:nowrap}</style>
 </head>
 <body>
 
@@ -562,7 +561,7 @@ function iosOk(x){try{localStorage.setItem('torneo-suizo-ios',(localStorage.getI
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid #c2410c"><h2 style="font-size:1.05rem;margin:0 0 4px">Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este dispositivo.')+' El torneo vive solo en este dispositivo: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn primary wide" id="b-bk-now" data-act="backup">Exportar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.4.7"; window.__APPVER=VERSION;
+var VERSION="1.4.8"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1975,6 +1974,17 @@ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().
     }).catch(function(){});
   });
 })();
+</script>
+<script>/* 1.4.8: la fecha y la hora de la portada usan la letra más grande que cabe en un renglón en cada celular */
+(function(){var box=document.getElementById('hdbox');if(!box||!window.MutationObserver)return;var busy=false;
+function fit(){if(busy)return;var h=box.querySelector('.hd');if(!h||!h.offsetParent)return;var L=h.children[0],R=h.children[1];if(!L||!R)return;var D=L.children[1],S=R.querySelector('small');busy=true;
+try{R.style.fontSize='';if(D)D.style.fontSize='';if(S)S.style.fontSize='';
+var wr=function(){return R.offsetTop>L.offsetTop+L.offsetHeight/2||(D&&D.scrollWidth>D.clientWidth+1)};
+if(wr()){var c=parseFloat(getComputedStyle(R).fontSize),d=D?parseFloat(getComputedStyle(D).fontSize):15,k=1;
+while(wr()&&k>.76){k-=.02;R.style.fontSize=(c*k).toFixed(1)+'px';var e=Math.max(12,d*k).toFixed(2)+'px';if(D)D.style.fontSize=e;if(S)S.style.fontSize=e}}}finally{setTimeout(function(){busy=false},0)}}
+new MutationObserver(fit).observe(box,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden']});
+addEventListener('resize',fit);addEventListener('orientationchange',function(){setTimeout(fit,300)});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);setTimeout(fit,0)})();
 </script>
 </body>
 </html>
