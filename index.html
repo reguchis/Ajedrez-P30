@@ -288,6 +288,13 @@ summary{color:var(--ink)}
 /* 1.4.8: portada de Ronda con las mismas medidas que Hoy de Asistencia */.hd{align-items:center;padding:0;margin:4px 0 2px}.hd .dia{font-size:22px;font-weight:800;line-height:1.15;margin:0}.hd .fec{font-size:15px;line-height:1.3;margin:2px 0 0}.hd .hora{font-size:34px;font-weight:800;letter-spacing:.5px;line-height:1.15;margin:0}.hd .hora small{font-size:15px;font-weight:700}.dcl{margin:6px 0 0;color:var(--muted)}.dcl b{color:var(--ink)}
 @media(min-width:600px){.hd .dia{font-size:26px}.hd .fec{font-size:15px}.hd .hora{font-size:40px}}
 /* 1.4.8: fecha de la portada en un renglón, con el tamaño original de Asistencia (15 px fecha, 34 px hora) */.hd{flex-wrap:wrap;column-gap:8px;row-gap:2px}.hd .dd,.hd .fec{white-space:nowrap}</style>
+<style>/* 1.4.12: renglón «Último» */
+.ulc{position:sticky;top:calc(6px + env(safe-area-inset-top,0px));z-index:3;display:flex;align-items:center;gap:8px;margin:8px 0;padding:4px 6px 4px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 2px 8px #0003}
+.ulc.ulco{border-color:#d97706;background:linear-gradient(rgba(245,158,11,.14),rgba(245,158,11,.14)),var(--surface)}
+.ulct{flex:1;min-width:0;font-size:14px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ulct small{opacity:.75;font-size:13px}
+.ulcb{flex:none;min-width:44px;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:inherit;font-weight:700;font-size:17px;cursor:pointer}.ulc.ulco .ulcb{border-color:#d97706}.ulcb:disabled{opacity:.35;cursor:default}
+</style>
+<style>/* 1.4.13: proyector con pocas mesas */@media(min-width:700px){.pj-grid.pj-one{grid-template-columns:1fr!important;gap:10px}.pj-grid.pj-one .pj-row{font-size:1.45em;padding:10px 18px}}</style>
 </head>
 <body>
 
@@ -562,7 +569,7 @@ function iosOk(x){try{localStorage.setItem('torneo-suizo-ios',(localStorage.getI
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid #c2410c"><h2 style="font-size:1.05rem;margin:0 0 4px">Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este dispositivo.')+' El torneo vive solo en este dispositivo: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn primary wide" id="b-bk-now" data-act="backup">Exportar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.4.11"; window.__APPVER=VERSION;
+var VERSION="1.4.13"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -879,7 +886,7 @@ function projHtml(){
     for(var t=0;t<nT;t++){
       var list=rd.games.filter(function(g){return g.tanda===t;}).sort(function(a,b){return a.mesa-b.mesa;});
       if(nT>1) body+='<p class="pj-h">Tanda '+LETTERS[t]+(t>0?' · entran conforme se desocupen tableros':'')+'</p>';
-      body+='<div class="pj-grid">'+list.map(function(g){
+      body+='<div class="pj-grid'+(list.length<=6?' pj-one':'')+'">'+list.map(function(g){   // 1.4.13: hasta 6 mesas, una columna con letra más grande
         var r=g.res==="1-0"?"1–0":g.res==="0-1"?"0–1":g.res==="d"?"½–½":"";
         return '<div class="pj-row"><span class="pj-m">Mesa <b>'+g.mesa+'</b></span>'+who(g.w,"w")+'<span class="pj-vs">vs</span>'+who(g.b,"b")+'<span class="pj-r">'+r+'</span></div>';
       }).join("")+'</div>';
@@ -1010,6 +1017,14 @@ function gameHtml(g,ri,gi,editable,preview){
   }
   return h+'</div>';
 }
+/* 1.4.12: renglón «Último» en Ronda: el último resultado capturado con ↶ para deshacerlo (igual que en Asistencia y Tareas).
+   Gris: resultado nuevo · naranja: se cambió o se quitó uno que ya estaba. Si esa mesa cambió después o ya no se puede corregir, ↶ se apaga */
+var RSL={"1-0":"1–0","0-1":"0–1","d":"½–½"};
+function lcTx(r){return r==null?"sin resultado":RSL[r]||r;}
+function lcSame(c){var rd=state.rondas&&state.rondas[c.ri];return !!rd&&rd.games[c.gi]===c.g;}
+function lcOk(c){var rd=state.rondas[c.ri],g=rd&&rd.games[c.gi];if(!g||c.und||!lcSame(c))return false;if(c.ri!==state.rondas.length-1&&!ui.unlock)return false;return (g.res==null?null:g.res)===c.n;}
+function lcHtml(ri){var c=ui.lc;if(!c||c.ri!==ri||readOnly||!lcSame(c))return"";var ok=lcOk(c);
+  return '<div class="ulc'+(!c.und&&c.o!=null?' ulco':'')+'"><div class="ulct"><small>'+(c.und?'Se deshizo:':'Último:')+'</small> Mesa '+c.mesa+' · '+lcTx(c.o)+' → <b>'+lcTx(c.n)+'</b></div>'+(c.und?'':'<button type="button" class="ulcb" data-act="lc-undo" aria-label="Deshacer el último resultado" title="Deshacer"'+(ok?'':' disabled')+'>↶</button>')+'</div>';}
 function gamesHtml(games,ri,editable,preview){
   var h="",nT=0;
   games.forEach(function(g){if(g.tanda+1>nT)nT=g.tanda+1;});
@@ -1070,6 +1085,7 @@ function viewRonda(){
     h+=ui.unlock?'<p class="note">Corrigiendo una ronda anterior. Los emparejamientos que ya se hicieron no cambian; solo se actualizan los puntos.</p>'
       :'<div class="row"><p class="note">Ronda cerrada.</p><button type="button" class="btn" id="b-unlock" data-act="unlock">Corregir resultados</button></div>';
   }
+  h+=lcHtml(ri);
   h+=gamesHtml(rd.games,ri,editable,false);
   if(isCurrent){
     var fin=finished(state);
@@ -1209,7 +1225,8 @@ function manSections(){
    '<li><b>Inicia el torneo.</b> Toca “Iniciar torneo” y sienta a los alumnos según su mesa. El primero de cada mesa lleva blancas.</li></ol>'+
    '<p><b>Pestañas</b></p><ul>'+
    '<li><b>Barra de abajo.</b> Ronda · Posiciones · Jugadores · Ajustes están siempre abajo, a la mano del pulgar, como en las apps de Asistencia y Tareas. Cada pestaña se abre desde arriba; si tocas la pestaña donde ya estás, la pantalla se queda como está.</li>'+
-   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo y <b>la pantalla se mueve con él</b>: a la izquierda, la siguiente; a la derecha, la anterior. Si la sueltas antes de llegar lejos, regresa a su lugar; en la primera y en la última cede un poco y regresa (no da la vuelta). El encabezado y los botones de abajo se quedan quietos. Si el dispositivo no deja guardar este ajuste (o el Tema), la app lo avisa y el ajuste vale mientras siga abierta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Subir y bajar.</b> En las pantallas largas (por ejemplo, Posiciones o Jugadores con muchos alumnos), al desplazarte aparecen abajo a la derecha, uno arriba del otro, dos botones redondos y transparentes: <b>↑</b> te lleva arriba y <b>↓</b> baja casi una pantalla. Se desvanecen solos a los 2 segundos sin moverte; para verlos otra vez, mueve un poco la pantalla. Se esconden mientras hay un aviso abajo; los avisos se quitan solos o al desplazarte.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el dispositivo); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización.</li>'+
+   '<li><b>Deslizar entre pestañas.</b> Si enciendes Ajustes › Configuración › «Deslizar entre pestañas» (viene apagado), también cambias de pestaña deslizando el dedo y <b>la pantalla se mueve con él</b>: a la izquierda, la siguiente; a la derecha, la anterior. Si la sueltas antes de llegar lejos, regresa a su lugar; en la primera y en la última cede un poco y regresa (no da la vuelta). El encabezado y los botones de abajo se quedan quietos. Si el dispositivo no deja guardar este ajuste (o el Tema), la app lo avisa y el ajuste vale mientras siga abierta. No se activa en el modo proyector, con el manual o una confirmación abiertos, con el teclado abierto, sobre una tabla que se desliza de lado ni si empiezas pegado a la orilla de la pantalla. Se guarda al tocarlo, solo en este equipo; «Restablecer configuración» lo vuelve a apagar.</li><li><b>Subir y bajar.</b> En las pantallas largas (por ejemplo, Posiciones o Jugadores con muchos alumnos), al desplazarte aparecen abajo a la derecha, uno arriba del otro, dos botones redondos y transparentes: <b>↑</b> te lleva arriba y <b>↓</b> baja casi una pantalla. Se desvanecen solos a los 2 segundos sin moverte; para verlos otra vez, mueve un poco la pantalla. Se esconden mientras hay un aviso abajo; los avisos se quitan solos o al desplazarte.</li><li><b>Tema.</b> En Ajustes › Configuración, el botón «Tema: claro/oscuro/auto» cambia entre claro, oscuro y automático (como el dispositivo); sirve, por ejemplo, para poner la app en claro al proyectar. Se guarda en este equipo; «Restablecer configuración» lo vuelve a automático.</li><li><b>Actualizaciones.</b> Como en Asistencia y Tareas: la app abre con la versión que tienes y, si hay una nueva, avisa arriba «Nueva versión … disponible». Toca <b>Actualizar</b> (o ✕ para hacerlo después); la app se recarga y avisa «App actualizada a la versión…». El torneo no se toca. También puedes revisar en Ajustes › Actualizaciones › Buscar actualización. Desde la 1.4.13, debajo está el <b>Registro de errores</b>: guarda los últimos 20 errores inesperados de la app en este dispositivo; «Copiar» los copia para mandarlos a quien te da soporte y «Borrar registro» lo vacía.</li>'+
+    '<li><b>Proyector con pocas mesas</b> (desde la 1.4.13): con hasta 6 mesas, los emparejamientos se proyectan en una sola columna con letra más grande; con 7 o más, en dos columnas.</li>'+
    '<li><b>Ícono nuevo</b> (desde la 1.4.11): un peón blanco con corona sobre fondo verde. En Android, el ícono de tu pantalla de inicio cambia solo en uno o dos días, al abrir la app con internet (Chrome puede preguntarte si lo actualizas: di que sí). En iPhone se queda el ícono anterior: <b>no lo borres para reinstalar</b>, porque en iPhone eso borra los datos de la app; dentro de la app sí ves el nuevo.</li>'+
    '<li><b>Fecha, hora y docente.</b> En Ronda, arriba, ves el día, la fecha, la hora y “Docente: tu nombre”. En Posiciones, Jugadores y Ajustes, un renglón con la fecha y la hora. La hora cambia sola. Si falta tu nombre, Ronda te avisa; escríbelo en Ajustes › Configuración.</li></ul>'+
    '<p><b>Botones de arriba</b></p><ul>'+
@@ -1220,6 +1237,7 @@ function manSections(){
    '<li><b>Reloj de tanda.</b> Toca “Iniciar” cuando todos empiecen. El tiempo es por partida, no por jugador. Suena un aviso cuando falta 1 minuto y otro al terminar; las partidas abiertas se definen por material (sección 7).</li>'+
    '<li><b>Tandas.</b> Si hay menos tableros que partidas, la ronda se divide en tandas. La tanda B entra conforme se desocupen tableros; quienes esperan en una ronda juegan primero en la siguiente.</li>'+
    '<li><b>Captura resultados.</b> En cada mesa toca <span class="nw">1–0</span> (ganan blancas), <span class="nw">½–½</span> (tablas) o <span class="nw">0–1</span> (ganan negras). Para corregir, toca otra opción; si tocas la misma, se borra.</li>'+
+    '<li><b>Renglón «Último»</b> (desde la 1.4.12). Arriba de las mesas aparece «Último: Mesa 3 · 1–0 → ½–½» con el último resultado que capturaste. Es gris si fue nuevo y naranja si cambiaste o quitaste uno. <b>↶</b> lo deshace; se apaga si esa mesa cambió después o si ya emparejaste la siguiente ronda.</li>'+
    '<li><b>Ronda completa.</b> Al capturar el último resultado, el reloj se detiene y arriba aparece “Ronda completa” con el botón para emparejar la siguiente ronda. El mismo botón está al final de la lista. Desde la 1.4.1 la pantalla te lleva al botón más cercano (o a “Torneo terminado”, en la última ronda) y lo ilumina en verde unos segundos.</li>'+
    '<li><b>Fin de una tanda.</b> Si la ronda tiene tandas, al capturar el último resultado de una tanda la pantalla baja al inicio de la siguiente y la ilumina en ámbar: son las partidas que siguen. Mientras capturas resultados sueltos, la pantalla no se mueve.</li>'+
    '<li><b>Guardar o compartir archivos.</b> En el celular o la tablet, el PDF de la ronda, el PDF de posiciones, el CSV de posiciones y el respaldo preguntan <b>«Guardar en el dispositivo»</b> (se guarda en Descargas) o <b>«Compartir…»</b> (WhatsApp, correo, Drive…). La opción que usaste la última vez sale primero (en el respaldo, siempre «Compartir…» primero) y resaltada; la otra siempre está. También pregunta en la tablet aunque Chrome la abra en modo escritorio. «Compartir…» abre el menú de Android o iPhone en ese mismo toque. Si el navegador no lo abre, la app te dice la razón y te deja tocar «Compartir…» otra vez o guardarlo en el dispositivo: nunca se guarda sin preguntarte. <b>Nombres de los archivos</b>: Ajedrez_Qué_Fecha_Hora, por ejemplo Ajedrez_Respaldo_2026-11-12_0950.json o Ajedrez_Posiciones_Ronda3_2026-11-12_0950.pdf, igual que en tus otras apps. Los respaldos con el nombre anterior (torneo-respaldo_…) se siguen abriendo igual. En el respaldo, aunque lo guardes en el dispositivo, guarda también una copia fuera de él. Al <b>compartir</b>, el respaldo va como <b>.txt</b> en lugar de .json, porque Android no deja compartir archivos .json: tiene el mismo contenido y la app lo recupera igual (acepta .json o .txt). En la computadora no pregunta: se descarga como siempre. «Copiar emparejamientos» sigue igual (copia el texto).</li><li><b>Copiar emparejamientos.</b> Copia la ronda como texto para pegarla en WhatsApp o en un documento.</li>'+
@@ -1333,7 +1351,16 @@ function prInner(){
 function card(id,title,inner){
   return '<details class="card" id="'+id+'"'+(ui.cards[id]?" open":"")+'><summary>'+title+'</summary><div class="cardin">'+inner+'</div></details>';
 }
-function updInner(){
+/* 1.4.13: Registro de errores (como en Asistencia y Tareas): guarda los últimos 20 errores inesperados en este dispositivo para poder copiarlos y mandarlos */
+var ERR_KEY="torneo-suizo-errlog";
+function errLog(m){try{var L=JSON.parse(localStorage.getItem(ERR_KEY)||"[]");L.unshift({t:Date.now(),v:VERSION,tab:(typeof ui!=="undefined"&&ui&&ui.tab)||"",m:String(m||"").slice(0,300)});localStorage.setItem(ERR_KEY,JSON.stringify(L.slice(0,20)));}catch(z){}}
+function errL(){try{var L=JSON.parse(localStorage.getItem(ERR_KEY)||"[]");return Array.isArray(L)?L:[];}catch(z){return [];}}
+function errFh(t){var d=new Date(+t),z=function(n){return String(n).padStart(2,"0");};return z(d.getDate())+"/"+z(d.getMonth()+1)+"/"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes());}
+function errHtml(){var L=errL();return '<p style="margin:14px 0 4px"><b>Registro de errores</b></p>'+(L.length?'<ol class="note" style="padding-left:20px;margin:6px 0">'+L.map(function(x){return '<li>'+esc(errFh(x.t))+' · v'+esc(x.v)+' · '+esc(x.tab)+'<br>'+esc(x.m)+'</li>';}).join("")+'</ol><div class="row"><button type="button" class="btn" data-act="err-copy">Copiar</button><button type="button" class="btn" data-act="err-clear">Borrar registro</button></div>':'<p class="note">Sin errores registrados. 👍</p>');}
+window.addEventListener("error",function(e){if(e&&e.message)errLog(e.message+(e.lineno?" (línea "+e.lineno+")":""));});
+window.addEventListener("unhandledrejection",function(e){errLog((e&&e.reason&&e.reason.message)||(e&&e.reason)||"desconocido");});
+function updInner(){return updInner0()+errHtml();}
+function updInner0(){
   if(IS_PWA) return '<p>Versión instalada: <b>'+VERSION+'</b></p>'+
     '<button type="button" class="btn wf" id="b-upd-check" data-act="upd-check">Buscar actualización</button>'+
     '<p class="note">Si hay una versión nueva aparece el aviso “Hay una versión nueva de la app”; toca “Actualizar”. El torneo guardado no se pierde.</p>';
@@ -1736,6 +1763,8 @@ function act(a,d){
       if(ri!==state.rondas.length-1&&!ui.unlock) return;
       var wasDone=roundDone(state.rondas[state.rondas.length-1]);
       var gT=state.rondas[ri]&&state.rondas[ri].games[gi]?state.rondas[ri].games[gi].tanda:0,wasT=tandaDone(ri,gT);
+      var g0=state.rondas[ri]&&state.rondas[ri].games[gi],o0=g0?(g0.res==null?null:g0.res):null;
+      if(g0&&g0.b!=null) ui.lc={ri:ri,gi:gi,g:g0,mesa:g0.mesa,o:o0,n:g0.res===d.r?null:d.r,t:Date.now(),und:false};   // 1.4.12: antes de dibujar
       mutate(function(s){var g=s.rondas[ri]&&s.rondas[ri].games[gi]; if(!g||g.b==null) return; g.res=g.res===d.r?null:d.r; s.playoff=null;});
       var lastR=state.rondas[state.rondas.length-1];
       if(ri===state.rondas.length-1&&!wasDone&&roundDone(lastR)){
@@ -1747,11 +1776,15 @@ function act(a,d){
         if(nx) ajFoc("tanda",ri,gT+1);
       }
       break;
+    case "lc-undo":   // 1.4.12: ↶ del renglón «Último»
+      var c=ui.lc; if(!c||!lcOk(c)) return;
+      ui.lc={ri:c.ri,gi:c.gi,g:c.g,mesa:c.mesa,o:c.n,n:c.o,t:Date.now(),und:true};
+      mutate(function(s){var g=s.rondas[c.ri]&&s.rondas[c.ri].games[c.gi]; if(!g) return; g.res=c.o; s.playoff=null;}); break;
     case "next":
       var cur=state.rondas[state.rondas.length-1];
       if(!cur||!roundDone(cur)||state.rondas.length>=state.rounds) return;
       if(activeCount()<2){toast("Para emparejar se necesitan al menos 2 alumnos que jueguen. Revisa Jugadores.");return;}   // 1.3.7
-      mutate(function(s){s.rondas.push({games:pairRound(s)});}); ui.round=null; ui.unlock=false; tReset(); render(); window.scrollTo(0,0);
+      mutate(function(s){s.rondas.push({games:pairRound(s)});}); ui.round=null; ui.unlock=false; ui.lc=null; tReset(); render(); window.scrollTo(0,0);
       toast("Ronda "+state.rondas.length+" emparejada"); break;
     case "proj-open": ui.proj=true; ui.projView=d.v||"pairs"; render(); break;
     case "proj-view": ui.projView=d.v; render(); break;
@@ -1759,6 +1792,11 @@ function act(a,d){
     case "proj-full":
       try{var pe=document.getElementById("proj"); if(document.fullscreenElement){document.exitFullscreen();}else if(pe.requestFullscreen){pe.requestFullscreen().catch(function(){toast("Este navegador no permite pantalla completa aquí.");});}else toast("Este navegador no permite pantalla completa aquí.");}catch(e){}
       break;
+    case "err-copy":   // 1.4.13
+      var et=errL().map(function(x){return errFh(x.t)+" · v"+x.v+" · "+x.tab+" · "+x.m;}).join("\n");
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(et).then(function(){toast("Registro copiado: pégalo en tu mensaje.");},function(){toast("No se pudo copiar.");});else toast("No se pudo copiar.");
+      break;
+    case "err-clear": try{localStorage.removeItem(ERR_KEY);}catch(z){} render(); toast("Registro de errores borrado."); break;
     case "upd-check": checkUpdate(); break;
     case "exit-ask": exitAsk(); break;
     case "exit-no": exitClose(); break;
