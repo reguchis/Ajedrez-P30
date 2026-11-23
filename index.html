@@ -17,7 +17,7 @@
 .prow .pgrp{flex:0 0 58px;width:58px;padding-left:4px;padding-right:4px;min-width:0;text-align:center;text-transform:uppercase}.prow .pgrp::placeholder{text-transform:none}#view::after{content:'';display:block;height:96px}body:has(#toast:not([hidden])) #navb{display:none}.row.pgf{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;align-items:stretch}.row.pgf>.btn,.row.pgf>.btn.primary{margin:0;width:100%;max-width:none;min-height:46px;padding:8px 6px;font-size:1rem}div.clockbar>.btn.btn{flex:0 0 112px;width:112px;margin:0}.row.rbt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.row.rbt>.btn{width:100%;max-width:none;margin:0}.row.rbt>.btn:first-child{grid-column:1/-1}@media(min-width:600px){.row.rbt{grid-template-columns:repeat(3,minmax(0,1fr))}.row.rbt>.btn:first-child{grid-column:auto}}@media(max-width:599px){div.clockbar.clockbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}div.clockbar>.clock,div.clockbar>.lbl{grid-column:1/-1}div.clockbar>.btn.btn{width:100%;flex:none;margin:0}}.eqr.eqr{display:flex!important;flex-wrap:wrap;justify-content:center;gap:8px;--c:var(--cp,2)}
 .eqr.eqr>*{flex:0 0 calc((100% - (var(--c) - 1)*8px)/var(--c))!important;width:auto!important;max-width:none!important;min-width:0!important;margin:0!important;grid-column:auto!important}
 .row.pgf.eqr{--cp:4}.pj-bar.eqr.eqr{flex:0 0 auto;width:min(100%,620px)}.pj-bar.eqr>*{white-space:nowrap;text-align:center;justify-content:center}@media(min-width:600px){.eqr.eqr{--c:var(--cw,4)}}
-@media (max-width:600px){.prow{grid-template-columns:40px minmax(0,1fr) auto!important;grid-template-areas:'n nm nm' 'n g a';row-gap:6px;padding:6px 0;border-bottom:1px solid var(--line)}.prow .num{grid-area:n}.prow .pname{grid-area:nm;width:100%}.prow .pgrp{grid-area:g;width:90px;flex:none;justify-self:start}.prow .sw{grid-area:a;padding:0 6px}}.sw input{width:24px;height:24px;flex:none}#t-status{font-size:.8125rem;line-height:1.3}</style>
+@media (max-width:600px){.prow{grid-template-columns:40px minmax(0,1fr) auto!important;grid-template-areas:'n nm nm' 'n g a';row-gap:6px;padding:6px 0;border-bottom:1px solid var(--line)}.prow .num{grid-area:n}.prow .pname{grid-area:nm;width:100%}.prow .pgrp{grid-area:g;width:90px;flex:none;justify-self:start}.prow .sw{grid-area:a;padding:0 6px}}.sw input{width:24px;height:24px;flex:none}#t-status{font-size:.8125rem;line-height:1.3}.brand{justify-content:center;align-items:center}.brand>div{text-align:center;flex:0 1 auto}.hdc{font-size:15px!important;gap:10px!important}@media(max-width:420px){#t-status{font-size:12px}}.hdc b{font-size:20px;font-weight:800}@media(min-width:600px){.hdc{font-size:17px!important}.hdc b{font-size:24px}}.hdc small{font-size:15px;font-weight:700}#hd-fl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style>
 <style>
 /* Layout: planilla de arbitraje en una columna; pestañas en una barra fija abajo, como en Asistencia y Tareas, y filas de mesa grandes para capturar con el pulgar. */
 :root{
@@ -53,8 +53,7 @@ button,input,textarea{font:inherit;color:inherit}
 .hbtn:focus-visible{outline:3px solid var(--felt);outline-offset:2px}
 .cloudrow{margin:6px 0 0}
 .brand{display:flex;align-items:flex-start;gap:10px;min-width:0}
-.glyph{flex:none;width:30px;height:30px;border-radius:5px;border:1px solid var(--line);
-  background:conic-gradient(var(--felt) 25%,var(--buff) 0 50%,var(--felt) 0 75%,var(--buff) 0)}
+.glyph{flex:none;width:36px;height:36px;border-radius:9px;}
 .brand div{min-width:0}
 h1{font-family:var(--display);font-weight:700;font-size:1.3rem;line-height:1.15;margin:0;text-wrap:balance;overflow-wrap:anywhere}
 .status{margin:2px 0 0;color:var(--muted);font-size:.875rem}
@@ -292,7 +291,7 @@ summary{color:var(--ink)}
   <header class="top">
     <button type="button" class="hbtn" id="b-exit" data-act="exit-ask" aria-label="Salir de la app" title="Salir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
     <div class="brand">
-      <span class="glyph" aria-hidden="true"></span>
+      <svg class="glyph" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#2c6a49"/><path fill="#f2b632" d="M23 21.5l-1.6-9.2 5.6 4.6L32 9.5l5 7.4 5.6-4.6-1.6 9.2z"/><circle cx="21.4" cy="11.4" r="1.8" fill="#f2b632"/><circle cx="32" cy="8.2" r="1.9" fill="#f2b632"/><circle cx="42.6" cy="11.4" r="1.8" fill="#f2b632"/><rect x="23" y="22.6" width="18" height="2.4" rx="1.2" fill="#f2b632"/><path fill="#fff" d="M32 26.5a6.2 6.2 0 0 1 4.3 10.7h1.4a1.6 1.6 0 0 1 0 3.2h-1.9c.5 5.4 2.4 8.6 5.2 10.9h.6a1.6 1.6 0 0 1 0 3.2h1.2c1.3 0 2.2 1 2.2 2.2V58H19v-1.3c0-1.2 1-2.2 2.2-2.2h1.2a1.6 1.6 0 0 1 0-3.2h.6c2.8-2.3 4.7-5.5 5.2-10.9h-1.9a1.6 1.6 0 0 1 0-3.2h1.4A6.2 6.2 0 0 1 32 26.5z"/></svg>
       <div><h1 id="t-name">Ajedrez Escolar</h1><p class="status" id="t-status"></p><p class="cloudrow" id="cloudrow" hidden><span class="cloud" id="cloud">En este dispositivo</span></p></div>
     </div>
     <button type="button" class="hbtn" id="b-help" data-act="help" aria-label="Ayuda: abre el manual en la sección de esta pantalla" title="Ayuda">?</button>
@@ -559,7 +558,7 @@ function iosOk(x){try{localStorage.setItem('torneo-suizo-ios',(localStorage.getI
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid #c2410c"><h2 style="font-size:1.05rem;margin:0 0 4px">Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este dispositivo.')+' El torneo vive solo en este dispositivo: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn primary wide" id="b-bk-now" data-act="backup">Exportar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.4.5"; window.__APPVER=VERSION;
+var VERSION="1.4.6"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -676,12 +675,13 @@ var DAYL=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 var MESL=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function nowParts(){
   var d=new Date(),h=d.getHours(),m=d.getMinutes();
-  return {dia:DAYL[d.getDay()],fec:d.getDate()+" de "+MESL[d.getMonth()]+" de "+d.getFullYear(),
+  return {dia:DAYL[d.getDay()],fec:d.getDate()+" de "+MESL[d.getMonth()]+" de "+d.getFullYear(),cor:DAYL[d.getDay()]+" "+d.getDate()+" "+MESL[d.getMonth()]+" "+d.getFullYear(),   // 1.4.6: barra corta «Domingo 22 noviembre 2026»
+
     hora:((h%12)||12)+":"+(m<10?"0":"")+m,ap:h<12?"a. m.":"p. m."};
 }
 function hdHtml(mode){
   var p=nowParts(),dc=(state.docente||"").trim();
-  if(mode==="compact") return '<div id="hdh" class="hdc"><span id="hd-fl">'+p.dia+' '+p.fec+'</span><b aria-label="Hora actual"><span id="hd-hora">'+p.hora+'</span><small id="hd-ap">'+p.ap+'</small></b></div>';
+  if(mode==="compact") return '<div id="hdh" class="hdc"><span id="hd-fl">'+p.cor+'</span><b aria-label="Hora actual"><span id="hd-hora">'+p.hora+'</span><small id="hd-ap">'+p.ap+'</small></b></div>';
   return '<div id="hdh"><div class="hd"><div><p class="dia" id="hd-dia">'+p.dia+'</p><p class="fec" id="hd-fec">'+p.fec+'</p></div>'+
     '<p class="hora" aria-label="Hora actual"><span id="hd-hora">'+p.hora+'</span><small id="hd-ap">'+p.ap+'</small></p></div>'+
     (dc?'<p class="dcl">Docente: <b>'+esc(dc)+'</b></p>':(readOnly?'':'<p class="dcl wa">Falta tu nombre: escríbelo en Ajustes › Configuración</p>'))+'</div>';
@@ -690,7 +690,7 @@ var NOWK="";
 function nowTick(){
   var p=nowParts(),k=p.dia+p.fec+p.hora+p.ap; if(k===NOWK) return; NOWK=k;
   var set=function(id,v){var e=document.getElementById(id); if(e&&e.textContent!==v) e.textContent=v;};
-  set("hd-dia",p.dia); set("hd-fec",p.fec); set("hd-fl",p.dia+" "+p.fec); set("hd-hora",p.hora); set("hd-ap",p.ap); set("pnow",p.hora); set("pnow-ap",p.ap);
+  set("hd-dia",p.dia); set("hd-fec",p.fec); set("hd-fl",p.cor); set("hd-hora",p.hora); set("hd-ap",p.ap); set("pnow",p.hora); set("pnow-ap",p.ap);
 }
 setInterval(function(){
   nowTick();
