@@ -1,8 +1,8 @@
-/* Ajedrez Escolar · versión 1.4.3 · Service Worker
+/* Ajedrez Escolar · Service Worker (la versión está en VERSION)
    Guarda la app en el dispositivo para abrirla sin internet.
    Al publicar una versión nueva, cambia el número de VERSION.
    La versión nueva se instala solo cuando index.html ya trae el mismo número. */
-var VERSION="1.4.17";
+var VERSION="1.4.18";
 var CACHE="torneo-suizo-p30-"+VERSION;
 var ARCHIVOS=["./","./index.html","./manifest.webmanifest","./icons/icon-192-v3.png","./icons/icon-512-v3.png","./icons/icon-maskable-512-v3.png","./icons/apple-touch-icon-v3.png","./icons/favicon-32-v3.png"];
 
@@ -49,12 +49,23 @@ function pagina(req){
     });
   });
 }
+// 1.4.18: el manifiesto y los íconos se piden primero a internet (3 s); sin conexión se usa la copia. Así el teléfono ve el ícono nuevo.
+var ICO=/(manifest\.webmanifest|\.png)$/;
+function netFirst(req){
+  var u=new URL(req.url);u.search="";var k=u.href;
+  var red=fetch(k,{cache:"no-cache"}).then(function(r){if(r&&r.ok){var cp=r.clone();return caches.open(CACHE).then(function(c){return c.put(k,cp);}).then(function(){return r;});}throw 0;});
+  var espera=new Promise(function(_,j){setTimeout(function(){j(0);},3000);});
+  return Promise.race([red,espera]).catch(function(){
+    return caches.open(CACHE).then(function(c){return c.match(k);}).then(function(r){return r||caches.match(req,{ignoreSearch:true});}).then(function(r){return r||Response.error();});
+  });
+}
 self.addEventListener("fetch",function(e){
   var req=e.request;
   if(req.method!=="GET") return;
   if(req.cache==="no-store") return; // revisar versiones: siempre directo a internet
   var url=new URL(req.url);
   if(url.origin!==self.location.origin) return;
+  if(req.mode!=="navigate"&&ICO.test(url.pathname)){e.respondWith(netFirst(req));return;}
   if(req.mode==="navigate"){e.respondWith(caches.open(CACHE).then(function(c){return c.match("./index.html");}).then(function(r){return r||pagina(req);}).catch(function(){return pagina(req);}));return;}
   e.respondWith(caches.match(req,{ignoreSearch:true}).then(function(r){
     return r||fetch(req).then(function(res){if(res&&res.ok&&url.pathname.indexOf(new URL(self.registration.scope).pathname)===0) guardar(req,res);return res;});
