@@ -2,7 +2,7 @@
    Guarda la app en el dispositivo para abrirla sin internet.
    Al publicar una versión nueva, cambia el número de VERSION.
    La versión nueva se instala solo cuando index.html ya trae el mismo número. */
-var VERSION="1.4.18";
+var VERSION="1.5.0";
 var CACHE="torneo-suizo-p30-"+VERSION;
 var ARCHIVOS=["./","./index.html","./manifest.webmanifest","./icons/icon-192-v3.png","./icons/icon-512-v3.png","./icons/icon-maskable-512-v3.png","./icons/apple-touch-icon-v3.png","./icons/favicon-32-v3.png"];
 
