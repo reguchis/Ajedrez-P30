@@ -21,6 +21,9 @@
    al tocar se encoge un poco; Tema: Claro | Oscuro | Auto; interruptor de Deslizar */
 .btn.tonal{background:var(--felt-soft);color:var(--felt);border-color:transparent;font-weight:700}
 .btn.danger{font-weight:600}
+.btn.add{background:transparent;border:1.5px dashed var(--muted)}
+button{transition:transform .08s ease,filter .08s ease}
+button:not(:disabled):active{transform:scale(.97);filter:brightness(.9)}
 .btn,.btn.wf{min-height:44px}
 .btn{transition:transform .08s ease,filter .08s ease}
 .btn:not(:disabled):active{transform:scale(.97);filter:brightness(.9)}
@@ -1071,7 +1074,7 @@ function viewRonda(){
       '<p class="lead">Indica cuántos jugadores y tableros tienes. El rol y las tandas se ajustan solos.</p>'+
       settingsBlock()+
       '<button type="button" class="btn primary wide" id="b-start" data-act="start"'+(activeCount()<2||readOnly?" disabled":"")+'>Iniciar torneo</button>'+
-      '<button type="button" class="btn wide" id="b-manual" data-act="manual" data-s="1">Ver manual rápido</button></section>';
+      '<button type="button" class="btn tonal wide" id="b-manual" data-act="manual" data-s="1">Ver manual rápido</button></section>';
     h+='<div class="stack"><h2>Ronda 1 <small>vista previa</small></h2>'+
       '<p class="note">Cada alumno juega con el número que le tocó en el sorteo. El primero de cada mesa lleva blancas.</p>'+
       gamesHtml(prev,0,false,true)+'</div>';
@@ -1223,7 +1226,7 @@ function viewJug(){
   });
   h+='</div>';
   if(!readOnly){
-    h+='<div class="row"><button type="button" class="btn" id="b-addp" data-act="addp">Agregar jugador '+(state.players.length+1)+'</button></div>';
+    h+='<div class="row"><button type="button" class="btn add" id="b-addp" data-act="addp">Agregar jugador '+(state.players.length+1)+'</button></div>';
     if(started) h+='<p class="note">Quien se agrega con el torneo empezado entra con 0 puntos desde la siguiente ronda.</p>';
   }
   h+='<div class="row"><button type="button" class="btn" id="b-copyp" data-act="copy-p">Copiar jugadores</button></div>'+copyBox()+'</section>';
@@ -1541,7 +1544,7 @@ function viewAj(){
     if(ui.confirm==="bk-reset"||ui.confirm==="bk-fresh"){
       var cc=ui.confirm.slice(3);
       bd+='<div class="banner buff" id="askbox"><p><b>'+(cc==="reset"?"Reiniciar torneo":"Nuevo torneo desde cero")+'.</b> Antes de borrar, ¿quieres guardar un respaldo del torneo? Después te pedirá escribir BORRAR.</p>'+
-        '<button type="button" class="btn wf" id="b-bkb" data-act="bkb" data-c="'+cc+'">Guardar respaldo y borrar</button>'+
+        '<button type="button" class="btn primary wf" id="b-bkb" data-act="bkb" data-c="'+cc+'">Guardar respaldo y borrar</button>'+
         '<button type="button" class="btn danger wf" id="b-bkn" data-act="bkn" data-c="'+cc+'">Borrar sin respaldo</button>'+
         '<button type="button" class="btn wf" id="b-bkc" data-act="cancel">Cancelar</button></div>';
     }
