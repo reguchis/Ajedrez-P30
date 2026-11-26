@@ -594,7 +594,7 @@ function iosOk(x){try{localStorage.setItem('torneo-suizo-ios',(localStorage.getI
 function bkCard(){if(readOnly||docRef||!state.rondas.length)return '';var t=bkLast();if(t&&Date.now()-t<7*864e5)return '';var d=Math.max(1,Math.floor((Date.now()-t)/864e5));
 return '<section class="panel" id="bka" style="border-left:4px solid #c2410c"><h2 style="font-size:1.05rem;margin:0 0 4px">Respaldo pendiente</h2><p class="note">'+(t?'Tu último respaldo fue hace '+d+(d===1?' día':' días')+'.':'Todavía no has guardado un respaldo en este dispositivo.')+' El torneo vive solo en este dispositivo: guarda una copia fuera de él (correo o nube).</p><button type="button" class="btn primary wide" id="b-bk-now" data-act="backup">Exportar respaldo ahora</button></section>';}
 var state=loadLocal()||blank(2);
-var VERSION="1.6.0";var BUILD="c6bf1e12"; window.__APPVER=VERSION;
+var VERSION="1.6.1";var BUILD="260b038e"; window.__APPVER=VERSION;
 var IS_PWA=!!document.querySelector('link[rel="manifest"]')&&location.protocol.indexOf("http")===0&&("serviceWorker" in navigator);
 var FRAMED=false; try{FRAMED=window.top!==window.self;}catch(e){FRAMED=true;}
 var ui={cards:{},bdc:false,askOk:false,manOpen:{},back:null,shrink:null,proj:false,projView:"pairs",about:false,tab:"ronda",round:null,unlock:false,confirm:null,copy:null,copyMsg:"",manual:false,sorteo:false,sorteoText:"",restore:null};
@@ -1433,7 +1433,7 @@ if(p.get('error'))return{msg:p.get('error')=='access_denied'?'Google no dio el p
 const tk=p.get('access_token');if(!tk)return{msg:'No se completó la entrada con Google'};
 if((p.get('scope')||GD_SC).indexOf('drive.appdata')<0)return{msg:'Falta el permiso de Drive: vuelve a tocar y marca la casilla de Google Drive'};
 try{localStorage.setItem(GD_TK,JSON.stringify({t:tk,e:Date.now()+(+p.get('expires_in')||3600)*1000}))}catch(e){}return{a:r.a}}
-const GDRET=gdRet();
+const GDRET=gdRet();if(GDRET){ui.tab='aj';ui.cards.datc=ui.cards.gdc=true;} /* al volver de Google se abre directo en Ajustes › Google Drive */
 function gdDespues(){const r=GDRET;if(!r)return;if(r.msg){gdOpenCard();setTimeout(()=>toast(r.msg,6000),400);return}gdBar(0);gdOpenCard();
 setTimeout(()=>{if(r.a=='entrar')gdEntrarOk();else if(r.a=='copias'){gdSync('toque');gdCopias()}else gdSync('toque').then(()=>{const s=gdSt();toast(s.err?s.err:'Sincronizado')})},600)}
 function gdAsk(then,primera){if(!GD_CID)return toast('La sincronización todavía no está activada en esta versión');if(!navigator.onLine)return toast('Sin internet: conéctate para sincronizar');if(gdRedir())return gdGo(then,primera);
@@ -1498,7 +1498,7 @@ window.addEventListener('online',()=>gdAuto('red'));
 document.addEventListener('visibilitychange',()=>{if(!gdOn())return;if(document.visibilityState=='visible')gdAuto('volver');else if(gdTok()&&gdLastW()>(gdSt().up||0))gdSync('salir').catch(()=>{})});
 setInterval(()=>{if(document.visibilityState=='visible'&&gdOn()&&gdTok())gdSync('reloj').catch(()=>{})},300000);
 function gdOpenCard(){ui.cards.gdc=true;ui.tab='aj';render();setTimeout(function(){var c=document.getElementById('gdc');if(c){c.open=true;c.scrollIntoView({block:'center'})}},500)}
-setTimeout(()=>{if(GDRET)return gdDespues();if(gdOn()){gdGis().catch(()=>{});gdAuto('abrir')}},2500);
+setTimeout(()=>{if(GDRET)return gdDespues();if(gdOn()){gdGis().catch(()=>{});gdAuto('abrir')}},GDRET?700:2500);
 
 /* tarjeta en Ajustes › Tus datos (después de «Respaldo») */
 function gdInner(){const e=gdEstado();if(e.cid&&(e.on||ui.cards&&ui.cards.gdc))gdGis().catch(()=>{});
