@@ -2,8 +2,9 @@
    Guarda la app en el dispositivo para abrirla sin internet.
    Al publicar una versión nueva, cambia el número de VERSION.
    La versión nueva se instala solo cuando index.html ya trae el mismo número. */
-var VERSION="1.5.2";
-var CACHE="torneo-suizo-p30-"+VERSION;
+var VERSION="1.6.0";
+var BUILD="c6bf1e12"; // 1.6.0: huella del contenido; si cambia sin subir VERSION, los aparatos se actualizan igual
+var CACHE="torneo-suizo-p30-"+VERSION+"-"+BUILD;
 var ARCHIVOS=["./","./index.html","./manifest.webmanifest","./icons/icon-192-v3.png","./icons/icon-512-v3.png","./icons/icon-maskable-512-v3.png","./icons/apple-touch-icon-v3.png","./icons/favicon-32-v3.png"];
 
 // Instala solo si GitHub ya publicó todos los archivos de esta versión.
@@ -17,7 +18,7 @@ self.addEventListener("install",function(e){
   })).then(function(lista){
     var idx=lista.filter(function(x){return x[0]==="./index.html";})[0];
     return idx[1].clone().text().then(function(t){
-      if(t.indexOf('var VERSION="'+VERSION+'"')<0) throw new Error("index.html todavía no es la versión "+VERSION);
+      if(t.indexOf('var VERSION="'+VERSION+'"')<0||t.indexOf('var BUILD="'+BUILD+'"')<0) throw new Error("index.html todavía no es la versión "+VERSION);
       return caches.open(CACHE).then(function(c){
         return Promise.all(lista.map(function(x){return c.put(x[0],x[1]);}));
       });

@@ -51,7 +51,7 @@ Los nombres y resultados se guardan solo en el dispositivo de cada docente. Este
 ## Publicar una versión nueva
 
 1. Reemplaza los archivos del repositorio por los de la versión nueva.
-2. En `sw.js`, el número de `VERSION` debe ser distinto al anterior.
+2. En `sw.js` e `index.html`, el número de `VERSION` debe ser distinto al anterior. Desde la 1.6.0 además lleva `BUILD` (huella del contenido): si se publica un cambio sin subir el número, los aparatos se actualizan igual.
 3. Al abrir la app, aparece el aviso *Hay una versión nueva de la app*; toca **Actualizar**.
 
 ## Dirección de la app (no la cambies)
